@@ -9,10 +9,12 @@
  * @link       https://seokar.click
  * @copyright  2025 تیم سئوکار
  * @version    2.1.0
+ * 
+ * @since      1.0.1
  */
 
 if (!defined('ABSPATH')) {
-    exit; // جلوگیری از دسترسی مستقیم
+    exit; // جلوگیری از دسترسی مستقیم به فایل‌ها
 }
 
 if (!class_exists('Seokar_Theme_Options')) {
