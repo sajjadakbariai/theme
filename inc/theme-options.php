@@ -66,5 +66,48 @@ function seokar_settings_page_render() {
             ?>
         </form>
     </div>
+
+<h1 class="seokar-panel-title">تنظیمات قالب سئوکار</h1>
+<div class="seokar-tabs">
+    <nav class="seokar-tab-menu">
+        <a href="?page=seokar-theme-options&tab=general" class="<?= $active_tab === 'general' ? 'active' : '' ?>">عمومی</a>
+        <a href="?page=seokar-theme-options&tab=seo" class="<?= $active_tab === 'seo' ? 'active' : '' ?>">سئو</a>
+        <a href="?page=seokar-theme-options&tab=ai" class="<?= $active_tab === 'ai' ? 'active' : '' ?>">هوش مصنوعی</a>
+        <a href="?page=seokar-theme-options&tab=api" class="<?= $active_tab === 'api' ? 'active' : '' ?>">اتصال API</a>
+        <a href="?page=seokar-theme-options&tab=advanced" class="<?= $active_tab === 'advanced' ? 'active' : '' ?>">پیشرفته</a>
+        <a href="?page=seokar-theme-options&tab=analytics" class="<?= $active_tab === 'analytics' ? 'active' : '' ?>">آمار سایت</a>
+    </nav>
+
+    <form method="post" action="options.php" class="seokar-tab-content <?= $active_tab ?>">
+        <?php
+        switch ($active_tab) {
+            case 'seo':
+                settings_fields('seokar_seo_options');
+                do_settings_sections('seokar_seo');
+                break;
+            case 'ai':
+                settings_fields('seokar_ai_options');
+                do_settings_sections('seokar_ai');
+                break;
+            case 'api':
+                settings_fields('seokar_api_options');
+                do_settings_sections('seokar_api');
+                break;
+            case 'advanced':
+                settings_fields('seokar_advanced_options');
+                do_settings_sections('seokar_advanced');
+                break;
+            case 'analytics':
+                settings_fields('seokar_analytics_options');
+                do_settings_sections('seokar_analytics');
+                break;
+            default:
+                settings_fields('seokar_general_options');
+                do_settings_sections('seokar_general');
+        }
+        submit_button('ذخیره تنظیمات');
+        ?>
+    </form>
+</div>
     <?php
 }
