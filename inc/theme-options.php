@@ -22,6 +22,13 @@ add_action('admin_init', function () {
     register_setting('seokar_api', 'seokar_api_options');
 });
 
+add_action('admin_enqueue_scripts', function ($hook) {
+    if ($hook === 'appearance_page_seokar-theme-options') {
+        wp_enqueue_style('seokar-theme-options-style', get_template_directory_uri() . '/assets/css/admin-options.css');
+        wp_enqueue_media(); // برای آپلود فایل
+    }
+});
+
 // رندر کردن صفحه تنظیمات با تب‌ها
 function seokar_settings_page_render() {
     $active_tab = $_GET['tab'] ?? 'general';
