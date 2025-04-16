@@ -1,22 +1,22 @@
 <?php
 /**
- * پنل تنظیمات حرفه‌ای قالب سئوکار
+ * پنل تنظیمات پیشرفته قالب سئوکـار
+ *
+ * این فایل بخشی از سیستم مدیریت قالب سئوکـار است و وظیفه بارگذاری و مدیریت تنظیمات حرفه‌ای مربوط به سئو، عملکرد، ظاهر و اتصال به API را بر عهده دارد.
  *
  * @package    Seokar
- * @subpackage Admin
+ * @subpackage Admin/Settings
  * @author     Sajjad Akbari <https://sajjadakbari.ir>
  * @license    GPL-3.0+
  * @link       https://seokar.click
- * @copyright  2025 تیم سئوکار
+ * @copyright  2025 تیم توسعه سئوکـار
  * @version    2.1.0
- * 
- * @since      1.0.1
+ * @since      1.0.1 اولین نسخه‌ای که پنل تنظیمات سئوکـار معرفی شد.
  */
-
+ 
 if (!defined('ABSPATH')) {
-    exit; // جلوگیری از دسترسی مستقیم به فایل‌ها
+    exit; // جلوگیری از دسترسی مستقیم به فایل
 }
-
 if (!class_exists('Seokar_Theme_Options')) {
 
     class Seokar_Theme_Options {
