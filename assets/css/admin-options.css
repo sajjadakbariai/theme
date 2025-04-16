@@ -40,3 +40,62 @@ input[type="checkbox"] {
   color: #777;
   margin-top: 4px;
 }
+.seokar-panel-title {
+  font-size: 26px;
+  color: #4b2aa5;
+  margin-bottom: 20px;
+}
+
+.seokar-tabs {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+
+.seokar-tab-menu {
+  display: flex;
+  border-bottom: 1px solid #eee;
+  background: linear-gradient(90deg, #6b4eff, #8b2fc9);
+}
+
+.seokar-tab-menu a {
+  flex: 1;
+  text-align: center;
+  padding: 12px 0;
+  color: #fff;
+  font-weight: bold;
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.seokar-tab-menu a:hover, .seokar-tab-menu .active {
+  background: #fff;
+  color: #6b4eff;
+  border-bottom: 3px solid #6b4eff;
+}
+
+.seokar-tab-content {
+  padding: 20px;
+}
+
+.seokar-tab-content.seo {
+  background: #fef9f9;
+}
+
+.seokar-tab-content.ai {
+  background: #f7faff;
+}
+
+.seokar-tab-content.api {
+  background: #fffdf7;
+}
+
+.seokar-tab-content.advanced {
+  background: #f6fff7;
+}
+
+.seokar-tab-content.analytics {
+  background: #fdf5ff;
+}
+
