@@ -540,3 +540,50 @@
     background: #4d555e;
   }
 }
+/* سوئیچ زیبا */
+.seokar-switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+.seokar-switch input { opacity: 0; }
+.seokar-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+}
+.seokar-slider.round { border-radius: 34px; }
+.seokar-slider.round:before {
+  border-radius: 50%;
+}
+.seokar-switch input:checked + .seokar-slider {
+  background-color: #2196F3;
+}
+.seokar-switch input:checked + .seokar-slider:before {
+  transform: translateX(26px);
+}
+
+/* لیاوت صفحه */
+.seokar-settings-container {
+  display: flex;
+  gap: 20px;
+}
+.seokar-settings-form {
+  flex: 3;
+}
+.seokar-settings-sidebar {
+  flex: 1;
+}
+.seokar-settings-card {
+  background: #fff;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
