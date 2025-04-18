@@ -32,3 +32,6 @@ add_filter('use_block_editor_for_post', '__return_false');
 
 // فعال‌سازی قابلیت آپدیت خودکار قالب (در صورت نیاز)
 add_filter('auto_update_theme', '__return_true');
+
+// در فایل functions.php
+require_once get_template_directory() . '/inc/theme-options.php';
