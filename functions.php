@@ -35,3 +35,21 @@ add_filter('auto_update_theme', '__return_true');
 
 // در فایل functions.php
 require_once get_template_directory() . '/inc/theme-options.php';
+
+// حالت توسعه (Dev Mode) برای جلوگیری از کش استایل و اسکریپت
+define('SEOKAR_DEV_MODE', true);
+
+function seokar_enqueue_page_styles() {
+    if (is_page()) {
+        $file = get_template_directory() . '/assets/css/page-style.css';
+        
+        if (SEOKAR_DEV_MODE) {
+            $version = time(); // همیشه نسخه جدید (کش نشه)
+        } else {
+            $version = file_exists($file) ? filemtime($file) : '1.0.0';
+        }
+        
+        wp_enqueue_style('seokar-page-style', get_template_directory_uri() . '/assets/css/page-style.css', array(), $version);
+    }
+}
+add_action('wp_enqueue_scripts', 'seokar_enqueue_page_styles');
