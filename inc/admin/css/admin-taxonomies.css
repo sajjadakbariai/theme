@@ -1,47 +1,312 @@
-/* استایل‌های مدیریت تاکسونومی‌های سفارشی */
+/**
+ * CSS حرفه‌ای برای مدیریت تاکسونومی‌های سفارشی - سطح نخبه
+ * 
+ * ویژگی‌های کلیدی:
+ * - طراحی ماژولار و کامپوننت‌محور
+ * - استفاده از متغیرهای CSS برای انعطاف‌پذیری
+ * - انیمیشن‌های ظریف و حرفه‌ای
+ * - طراحی ریسپانسیو
+ * - استفاده از تکنیک‌های مدرن CSS
+ * - بهینه‌سازی برای عملکرد بالا
+ */
+
+:root {
+  /* پالت رنگی حرفه‌ای */
+  --seokar-primary: #4361ee;
+  --seokar-primary-dark: #3a56d4;
+  --seokar-secondary: #3f37c9;
+  --seokar-accent: #4895ef;
+  --seokar-light: #f8f9fa;
+  --seokar-dark: #212529;
+  --seokar-success: #4cc9f0;
+  --seokar-warning: #f8961e;
+  --seokar-danger: #f72585;
+  --seokar-border-radius: 0.375rem;
+  --seokar-box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --seokar-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* طرح‌بندی اصلی */
+.seokar-taxonomy-admin {
+  --seokar-gutter: 1.5rem;
+  font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.6;
+  color: var(--seokar-dark);
+}
+
+/* کارت متا فیلدها - با طراحی مدرن */
 .seokar-taxonomy-meta {
-    margin: 20px 0;
-    padding: 15px;
-    background: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+  margin: var(--seokar-gutter) 0;
+  padding: 1.5rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--seokar-border-radius);
+  box-shadow: var(--seokar-box-shadow);
+  transition: var(--seokar-transition);
 }
 
+.seokar-taxonomy-meta:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* فرم فیلدها با طراحی سیستماتیک */
 .seokar-taxonomy-meta .form-field {
-    margin-bottom: 15px;
+  margin-bottom: 1.25rem;
+  position: relative;
 }
 
+.seokar-taxonomy-meta .form-field:last-child {
+  margin-bottom: 0;
+}
+
+/* لیبل‌های زیبا با افکت‌های مدرن */
 .seokar-taxonomy-meta label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 600;
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--seokar-secondary);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
+/* اینپوت‌های حرفه‌ای */
 .seokar-taxonomy-meta input[type="text"],
-.seokar-taxonomy-meta input[type="url"] {
-    width: 100%;
-    padding: 8px;
+.seokar-taxonomy-meta input[type="url"],
+.seokar-taxonomy-meta input[type="email"],
+.seokar-taxonomy-meta select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--seokar-border-radius);
+  background-color: #f8fafc;
+  transition: var(--seokar-transition);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--seokar-dark);
 }
 
-.seokar-taxonomy-meta .image-preview {
-    max-width: 150px;
-    height: auto;
-    margin-top: 10px;
-    display: block;
+.seokar-taxonomy-meta input:focus {
+  outline: none;
+  border-color: var(--seokar-accent);
+  box-shadow: 0 0 0 3px rgba(72, 149, 239, 0.2);
+  background-color: white;
 }
 
-.seokar-taxonomy-meta .button-upload {
-    margin-top: 10px;
+/* مدیریت تصویر با طراحی پیشرفته */
+.seokar-image-upload-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-/* استایل‌های ستون‌های سفارشی در لیست تاکسونومی‌ها */
-.column-icon i {
-    font-size: 20px;
-    vertical-align: middle;
+.seokar-image-preview {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--seokar-border-radius);
+  border: 2px dashed #cbd5e0;
+  transition: var(--seokar-transition);
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  background-color: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
 }
 
-.column-image img {
-    max-width: 50px;
-    height: auto;
-    border-radius: 3px;
+.seokar-image-preview.has-image {
+  border: none;
+  background: transparent;
+}
+
+.seokar-image-preview-placeholder {
+  text-align: center;
+  padding: 1rem;
+}
+
+/* دکمه‌های حرفه‌ای با افکت‌های تعاملی */
+.seokar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--seokar-border-radius);
+  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid transparent;
+  transition: var(--seokar-transition);
+}
+
+.seokar-btn-primary {
+  background-color: var(--seokar-primary);
+  color: white;
+}
+
+.seokar-btn-primary:hover {
+  background-color: var(--seokar-primary-dark);
+  transform: translateY(-1px);
+}
+
+.seokar-btn-outline {
+  background-color: transparent;
+  border: 1px solid var(--seokar-primary);
+  color: var(--seokar-primary);
+}
+
+.seokar-btn-outline:hover {
+  background-color: rgba(67, 97, 238, 0.1);
+}
+
+.seokar-btn-danger {
+  background-color: var(--seokar-danger);
+  color: white;
+}
+
+.seokar-btn-danger:hover {
+  background-color: #e5177a;
+}
+
+/* گروه دکمه‌ها */
+.seokar-btn-group {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+/* استایل‌های پیشرفته برای ستون‌های لیست تاکسونومی */
+.wp-list-table .column-icon {
+  width: 60px;
+  text-align: center;
+}
+
+.wp-list-table .column-icon i {
+  font-size: 1.5rem;
+  color: var(--seokar-primary);
+  transition: var(--seokar-transition);
+}
+
+.wp-list-table .column-icon i:hover {
+  transform: scale(1.2);
+}
+
+.wp-list-table .column-image {
+  width: 80px;
+}
+
+.wp-list-table .column-image img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid white;
+  box-shadow: var(--seokar-box-shadow);
+  transition: var(--seokar-transition);
+}
+
+.wp-list-table .column-image img:hover {
+  transform: scale(1.1);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+}
+
+/* انیمیشن‌های حرفه‌ای */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.seokar-taxonomy-meta {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* طراحی ریسپانسیو */
+@media (min-width: 768px) {
+  .seokar-image-upload-wrapper {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+  
+  .seokar-image-preview {
+    max-width: 200px;
+  }
+}
+
+/* وضعیت‌های مختلف */
+.seokar-state-success {
+  color: var(--seokar-success);
+  fill: var(--seokar-success);
+}
+
+.seokar-state-warning {
+  color: var(--seokar-warning);
+  fill: var(--seokar-warning);
+}
+
+.seokar-state-danger {
+  color: var(--seokar-danger);
+  fill: var(--seokar-danger);
+}
+
+/* تایپوگرافی پیشرفته */
+.seokar-heading {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--seokar-dark);
+  margin-bottom: 1rem;
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+
+.seokar-heading::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 50px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--seokar-primary), var(--seokar-accent));
+  border-radius: 3px;
+}
+
+/* اسکلتون لودینگ پیشرفته */
+@keyframes shimmer {
+  0% { background-position: -468px 0; }
+  100% { background-position: 468px 0; }
+}
+
+.seokar-skeleton {
+  animation: shimmer 1.5s infinite linear;
+  background: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+  background-size: 800px 104px;
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--seokar-border-radius);
+}
+
+/* اعتبارسنجی فرم */
+.seokar-invalid-feedback {
+  display: none;
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--seokar-danger);
+}
+
+.seokar-is-invalid ~ .seokar-invalid-feedback {
+  display: block;
+}
+
+.seokar-is-invalid {
+  border-color: var(--seokar-danger) !important;
+}
+
+.seokar-is-invalid:focus {
+  box-shadow: 0 0 0 3px rgba(247, 37, 133, 0.2) !important;
 }
