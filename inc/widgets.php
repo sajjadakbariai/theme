@@ -101,7 +101,7 @@ class SEOKar_Widgets {
         // Widgets CSS
         wp_enqueue_style(
             'seokar-widgets',
-            get_template_directory_uri() . '/assets/css/widgets.css',
+            get_template_directory_uri() . 'inc/admin/css/widgets.css',
             array(),
             '1.0.0'
         );
@@ -111,7 +111,7 @@ class SEOKar_Widgets {
             is_active_widget(false, false, 'seokar_social_media')) {
             wp_enqueue_script(
                 'seokar-widgets',
-                get_template_directory_uri() . '/assets/js/widgets.js',
+                get_template_directory_uri() . 'inc/admin/js/widgets.js',
                 array('jquery'),
                 '1.0.0',
                 true
@@ -485,3 +485,197 @@ class SEOKar_Author_Info_Widget extends WP_Widget {
         return $instance;
     }
 }
+/**
+ * AJAX handler for newsletter subscription
+ */
+function seokar_newsletter_subscribe() {
+    check_ajax_referer('seokar_widgets_nonce', 'security');
+    
+    if (!isset($_POST['email']) || !is_email($_POST['email'])) {
+        wp_send_json_error(__('Please enter a valid email address.', 'seokar'));
+    }
+    
+    $email = sanitize_email($_POST['email']);
+    $option_name = 'seokar_newsletter_subscribers';
+    
+    // Get current subscribers
+    $subscribers = get_option($option_name, array());
+    
+    // Check if email already exists
+    if (in_array($email, $subscribers)) {
+        wp_send_json_error(__('This email is already subscribed.', 'seokar'));
+    }
+    
+    // Add new subscriber
+    $subscribers[] = $email;
+    update_option($option_name, $subscribers);
+    
+    // Send confirmation email (optional)
+    $subject = __('Thank you for subscribing!', 'seokar');
+    $message = __('Thank you for subscribing to our newsletter.', 'seokar');
+    wp_mail($email, $subject, $message);
+    
+    wp_send_json_success(array(
+        'message' => __('Thank you for subscribing!', 'seokar')
+    ));
+}
+add_action('wp_ajax_seokar_newsletter_subscribe', 'seokar_newsletter_subscribe');
+add_action('wp_ajax_nopriv_seokar_newsletter_subscribe', 'seokar_newsletter_subscribe');
+
+/**
+ * Add custom user contact methods for social links
+ */
+function seokar_add_user_contact_methods($methods) {
+    $methods['facebook'] = __('Facebook URL', 'seokar');
+    $methods['twitter'] = __('Twitter URL', 'seokar');
+    $methods['instagram'] = __('Instagram URL', 'seokar');
+    $methods['linkedin'] = __('LinkedIn URL', 'seokar');
+    $methods['youtube'] = __('YouTube URL', 'seokar');
+    $methods['pinterest'] = __('Pinterest URL', 'seokar');
+    
+    return $methods;
+}
+add_filter('user_contactmethods', 'seokar_add_user_contact_methods');
+
+/**
+ * Track post views
+ */
+function seokar_track_post_views($post_id) {
+    if (!is_single()) return;
+    if (empty($post_id)) {
+        global $post;
+        $post_id = $post->ID;
+    }
+    seokar_set_post_views($post_id);
+}
+add_action('wp_head', 'seokar_track_post_views');
+
+function seokar_set_post_views($post_id) {
+    $count_key = 'post_views_count';
+    $count = get_post_meta($post_id, $count_key, true);
+    
+    if ($count == '') {
+        delete_post_meta($post_id, $count_key);
+        add_post_meta($post_id, $count_key, '0');
+    } else {
+        $count++;
+        update_post_meta($post_id, $count_key, $count);
+    }
+}
+
+/**
+ * Shortcode for displaying popular posts
+ */
+function seokar_popular_posts_shortcode($atts) {
+    $atts = shortcode_atts(array(
+        'number' => 5,
+        'show_date' => false
+    ), $atts, 'seokar_popular_posts');
+    
+    ob_start();
+    
+    $popular_posts = new WP_Query(array(
+        'posts_per_page' => absint($atts['number']),
+        'meta_key' => 'post_views_count',
+        'orderby' => 'meta_value_num',
+        'order' => 'DESC',
+        'ignore_sticky_posts' => true
+    ));
+    
+    if ($popular_posts->have_posts()) {
+        echo '<ul class="seokar-popular-posts-shortcode">';
+        while ($popular_posts->have_posts()) {
+            $popular_posts->the_post();
+            echo '<li>';
+            if (has_post_thumbnail()) {
+                echo '<a href="' . esc_url(get_permalink()) . '" class="popular-post-thumbnail">';
+                the_post_thumbnail('thumbnail');
+                echo '</a>';
+            }
+            echo '<div class="popular-post-content">';
+            echo '<a href="' . esc_url(get_permalink()) . '">' . get_the_title() . '</a>';
+            if ($atts['show_date']) {
+                echo '<span class="post-date">' . get_the_date() . '</span>';
+            }
+            echo '</div>';
+            echo '</li>';
+        }
+        echo '</ul>';
+        wp_reset_postdata();
+    } else {
+        echo '<p>' . esc_html__('No popular posts found.', 'seokar') . '</p>';
+    }
+    
+    return ob_get_clean();
+}
+add_shortcode('seokar_popular_posts', 'seokar_popular_posts_shortcode');
+
+/**
+ * Dashboard widget for newsletter subscribers
+ */
+function seokar_add_dashboard_widget() {
+    wp_add_dashboard_widget(
+        'seokar_newsletter_widget',
+        __('Newsletter Subscribers', 'seokar'),
+        'seokar_dashboard_widget_content'
+    );
+}
+add_action('wp_dashboard_setup', 'seokar_add_dashboard_widget');
+
+function seokar_dashboard_widget_content() {
+    $subscribers = get_option('seokar_newsletter_subscribers', array());
+    $count = count($subscribers);
+    
+    echo '<div class="seokar-dashboard-widget">';
+    echo '<h3>' . sprintf(__('Total Subscribers: %d', 'seokar'), $count) . '</h3>';
+    
+    if ($count > 0) {
+        echo '<div class="subscriber-list-container">';
+        echo '<table class="wp-list-table widefat fixed striped">';
+        echo '<thead><tr><th>' . __('Email', 'seokar') . '</th></tr></thead>';
+        echo '<tbody>';
+        
+        foreach ($subscribers as $email) {
+            echo '<tr><td>' . esc_html($email) . '</td></tr>';
+        }
+        
+        echo '</tbody></table>';
+        echo '</div>';
+        
+        // Export button
+        echo '<p><a href="' . admin_url('admin-ajax.php?action=seokar_export_subscribers&nonce=' . wp_create_nonce('export_subscribers')) . '" class="button button-primary">' . __('Export Subscribers', 'seokar') . '</a></p>';
+    } else {
+        echo '<p>' . __('No subscribers yet.', 'seokar') . '</p>';
+    }
+    
+    echo '</div>';
+}
+
+/**
+ * Export subscribers functionality
+ */
+function seokar_export_subscribers() {
+    check_ajax_referer('export_subscribers', 'nonce');
+    
+    $subscribers = get_option('seokar_newsletter_subscribers', array());
+    
+    if (empty($subscribers)) {
+        wp_die(__('No subscribers to export.', 'seokar'));
+    }
+    
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename=seokar-subscribers-' . date('Y-m-d') . '.csv');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+    
+    $output = fopen('php://output', 'w');
+    fputcsv($output, array('Email'));
+    
+    foreach ($subscribers as $email) {
+        fputcsv($output, array($email));
+    }
+    
+    fclose($output);
+    exit;
+}
+add_action('wp_ajax_seokar_export_subscribers', 'seokar_export_subscribers');
