@@ -3631,3 +3631,325 @@ class SeoKar_Core {
         return round($final_score);
     }
 }
+<?php
+/**
+ * SEO Framework Settings API Class
+ * 
+ * Handles all settings page functionality
+ */
+
+class SeoKar_Settings_API {
+
+    private static $_instance = null;
+    private $settings = array();
+
+    public static function instance() {
+        if (is_null(self::$_instance)) {
+            self::$_instance = new self();
+        }
+        return self::$_instance;
+    }
+
+    public function __construct() {
+        add_action('admin_init', array($this, 'admin_init'));
+    }
+
+    /**
+     * Initialize settings
+     */
+    public function init() {
+        $this->settings = $this->get_registered_settings();
+        $this->register_settings();
+    }
+
+    /**
+     * Get all registered settings
+     */
+    private function get_registered_settings() {
+        $settings = array(
+            'general' => $this->get_general_settings(),
+            'onpage' => $this->get_onpage_settings(),
+            'schema' => $this->get_schema_settings(),
+            'advanced' => $this->get_advanced_settings(),
+            'tools' => $this->get_tools_settings()
+        );
+
+        return apply_filters('seokar_registered_settings', $settings);
+    }
+
+    /**
+     * Register all settings
+     */
+    private function register_settings() {
+        foreach ($this->settings as $section => $settings) {
+            add_settings_section(
+                'seokar_settings_' . $section,
+                __return_null(),
+                '__return_false',
+                'seokar_settings_' . $section
+            );
+
+            foreach ($settings as $option) {
+                $name = isset($option['name']) ? $option['name'] : '';
+
+                add_settings_field(
+                    'seokar_settings[' . $option['id'] . ']',
+                    $name,
+                    array($this, $option['type'] . '_callback'),
+                    'seokar_settings_' . $section,
+                    'seokar_settings_' . $section,
+                    array(
+                        'id' => $option['id'],
+                        'desc' => !empty($option['desc']) ? $option['desc'] : '',
+                        'name' => $option['name'],
+                        'section' => $section,
+                        'size' => isset($option['size']) ? $option['size'] : null,
+                        'options' => isset($option['options']) ? $option['options'] : '',
+                        'std' => isset($option['std']) ? $option['std'] : '',
+                        'min' => isset($option['min']) ? $option['min'] : '',
+                        'max' => isset($option['max']) ? $option['max'] : '',
+                        'step' => isset($option['step']) ? $option['step'] : ''
+                    )
+                );
+
+                register_setting('seokar_settings', 'seokar_settings', array($this, 'sanitize_settings'));
+            }
+        }
+    }
+
+    /**
+     * Get general settings
+     */
+    private function get_general_settings() {
+        return array(
+            array(
+                'id' => 'separator',
+                'name' => __('Title Separator', 'seokar'),
+                'desc' => __('Character to separate site name from page title', 'seokar'),
+                'type' => 'text',
+                'size' => 'small',
+                'std' => '|'
+            ),
+            array(
+                'id' => 'title_template',
+                'name' => __('Title Template', 'seokar'),
+                'desc' => __('Template for page titles. Available tags: {title}, {sitename}, {sep}, {description}', 'seokar'),
+                'type' => 'text',
+                'std' => '{title} {sep} {sitename}'
+            ),
+            array(
+                'id' => 'description_template',
+                'name' => __('Meta Description Template', 'seokar'),
+                'desc' => __('Template for meta descriptions. Available tags: {excerpt}, {title}, {sitename}, {sep}', 'seokar'),
+                'type' => 'textarea',
+                'std' => '{excerpt}'
+            ),
+            array(
+                'id' => 'social_image',
+                'name' => __('Default Social Image', 'seokar'),
+                'desc' => __('Default image used when sharing on social media', 'seokar'),
+                'type' => 'upload',
+                'std' => ''
+            ),
+            array(
+                'id' => 'enable_social_meta',
+                'name' => __('Enable Social Meta', 'seokar'),
+                'desc' => __('Add OpenGraph and Twitter Card meta tags', 'seokar'),
+                'type' => 'checkbox',
+                'std' => '1'
+            )
+        );
+    }
+
+    /**
+     * Get on-page SEO settings
+     */
+    private function get_onpage_settings() {
+        return array(
+            array(
+                'id' => 'keyword_analysis',
+                'name' => __('Keyword Analysis', 'seokar'),
+                'desc' => __('Enable keyword analysis for posts and pages', 'seokar'),
+                'type' => 'checkbox',
+                'std' => '1'
+            ),
+            array(
+                'id' => 'readability_analysis',
+                'name' => __('Readability Analysis', 'seokar'),
+                'desc' => __('Enable readability analysis (Flesch-Kincaid)', 'seokar'),
+                'type' => 'checkbox',
+                'std' => '1'
+            ),
+            array(
+                'id' => 'link_suggestions',
+                'name' => __('Internal Link Suggestions', 'seokar'),
+                'desc' => __('Suggest internal links based on content', 'seokar'),
+                'type' => 'checkbox',
+                'std' => '1'
+            ),
+            array(
+                'id' => 'content_analysis_rules',
+                'name' => __('Content Analysis Rules', 'seokar'),
+                'desc' => __('Configure what to check in content analysis', 'seokar'),
+                'type' => 'multicheck',
+                'options' => array(
+                    'heading_structure' => __('Heading structure (H1-H6)', 'seokar'),
+                    'paragraph_length' => __('Paragraph length', 'seokar'),
+                    'image_alt' => __('Image alt attributes', 'seokar'),
+                    'internal_links' => __('Internal links', 'seokar'),
+                    'external_links' => __('External links', 'seokar'),
+                    'keyword_density' => __('Keyword density', 'seokar'),
+                    'meta_length' => __('Meta title/description length', 'seokar')
+                ),
+                'std' => array(
+                    'heading_structure' => '1',
+                    'image_alt' => '1',
+                    'internal_links' => '1',
+                    'meta_length' => '1'
+                )
+            )
+        );
+    }
+
+    /**
+     * Text callback
+     */
+    public function text_callback($args) {
+        $value = $this->get_option($args['id'], $args['section'], $args['std']);
+        
+        $size = isset($args['size']) && !is_null($args['size']) ? $args['size'] : 'regular';
+        $html = '<input type="text" class="' . $size . '-text" id="seokar_settings[' . $args['id'] . ']" name="seokar_settings[' . $args['id'] . ']" value="' . esc_attr($value) . '">';
+        $html .= '<label for="seokar_settings[' . $args['id'] . ']"> ' . $args['desc'] . '</label>';
+        
+        echo $html;
+    }
+
+    /**
+     * Textarea callback
+     */
+    public function textarea_callback($args) {
+        $value = $this->get_option($args['id'], $args['section'], $args['std']);
+        
+        $html = '<textarea class="large-text" cols="50" rows="5" id="seokar_settings[' . $args['id'] . ']" name="seokar_settings[' . $args['id'] . ']">' . esc_textarea($value) . '</textarea>';
+        $html .= '<label for="seokar_settings[' . $args['id'] . ']"> ' . $args['desc'] . '</label>';
+        
+        echo $html;
+    }
+
+    /**
+     * Checkbox callback
+     */
+    public function checkbox_callback($args) {
+        $value = $this->get_option($args['id'], $args['section'], $args['std']);
+        
+        $html = '<input type="checkbox" id="seokar_settings[' . $args['id'] . ']" name="seokar_settings[' . $args['id'] . ']" value="1" ' . checked(1, $value, false) . '>';
+        $html .= '<label for="seokar_settings[' . $args['id'] . ']"> ' . $args['desc'] . '</label>';
+        
+        echo $html;
+    }
+
+    /**
+     * Multicheck callback
+     */
+    public function multicheck_callback($args) {
+        $value = $this->get_option($args['id'], $args['section'], $args['std']);
+        
+        $html = '';
+        foreach ($args['options'] as $key => $option) {
+            $checked = isset($value[$key]) ? $value[$key] : '0';
+            $html .= '<input type="checkbox" id="seokar_settings[' . $args['id'] . '][' . $key . ']" name="seokar_settings[' . $args['id'] . '][' . $key . ']" value="1" ' . checked(1, $checked, false) . '>';
+            $html .= '<label for="seokar_settings[' . $args['id'] . '][' . $key . ']"> ' . $option . '</label><br>';
+        }
+        $html .= '<label for="seokar_settings[' . $args['id'] . ']"> ' . $args['desc'] . '</label>';
+        
+        echo $html;
+    }
+
+    /**
+     * Upload callback
+     */
+    public function upload_callback($args) {
+        $value = $this->get_option($args['id'], $args['section'], $args['std']);
+        
+        $html = '<input type="text" class="regular-text" id="seokar_settings[' . $args['id'] . ']" name="seokar_settings[' . $args['id'] . ']" value="' . esc_attr($value) . '">';
+        $html .= '<span>&nbsp;<input type="button" class="button seokar-upload-button" value="' . __('Upload', 'seokar') . '"></span>';
+        $html .= '<label for="seokar_settings[' . $args['id'] . ']"> ' . $args['desc'] . '</label>';
+        
+        echo $html;
+    }
+
+    /**
+     * Get option value
+     */
+    public function get_option($option, $section, $default = '') {
+        $options = get_option('seokar_settings');
+        
+        if (isset($options[$option])) {
+            return $options[$option];
+        }
+        
+        return $default;
+    }
+
+    /**
+     * Sanitize settings
+     */
+    public function sanitize_settings($input) {
+        if (empty($_POST['_wp_http_referer'])) {
+            return $input;
+        }
+        
+        $output = array();
+        $settings = $this->get_registered_settings();
+        
+        foreach ($settings as $section => $settings) {
+            foreach ($settings as $setting) {
+                $key = $setting['id'];
+                
+                if (isset($input[$key])) {
+                    switch ($setting['type']) {
+                        case 'text':
+                            $output[$key] = sanitize_text_field($input[$key]);
+                            break;
+                            
+                        case 'textarea':
+                            $output[$key] = sanitize_textarea_field($input[$key]);
+                            break;
+                            
+                        case 'checkbox':
+                            $output[$key] = '1';
+                            break;
+                            
+                        case 'multicheck':
+                            $options = array();
+                            foreach ($setting['options'] as $opt_key => $value) {
+                                $options[$opt_key] = isset($input[$key][$opt_key]) ? '1' : '0';
+                            }
+                            $output[$key] = $options;
+                            break;
+                            
+                        case 'upload':
+                            $output[$key] = esc_url_raw($input[$key]);
+                            break;
+                            
+                        default:
+                            $output[$key] = sanitize_text_field($input[$key]);
+                            break;
+                    }
+                } else {
+                    if ($setting['type'] === 'checkbox') {
+                        $output[$key] = '0';
+                    } elseif ($setting['type'] === 'multicheck') {
+                        $options = array();
+                        foreach ($setting['options'] as $opt_key => $value) {
+                            $options[$opt_key] = '0';
+                        }
+                        $output[$key] = $options;
+                    }
+                }
+            }
+        }
+        
+        return $output;
+    }
+}
