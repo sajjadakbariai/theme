@@ -60,3 +60,12 @@ function seokar_404_styles() {
     }
 }
 add_action('wp_enqueue_scripts', 'seokar_404_styles');
+
+
+add_filter('the_content', function($content) {
+    if (is_single() && in_the_loop() && is_main_query()) {
+        // این تابع به صورت خودکار CSS را هم اضافه می‌کند
+        $content .= ai_display_related_posts(get_the_ID());
+    }
+    return $content;
+});
