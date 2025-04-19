@@ -69,3 +69,16 @@ add_filter('the_content', function($content) {
     }
     return $content;
 });
+<?php
+/**
+ * فایل هوش 
+ */
+
+// بارگذاری تنظیمات هوش مصنوعی
+require_once get_template_directory() . '/inc/ai-settings.php';
+
+// استایل‌های اضافی برای ماژول‌ها
+add_action('wp_enqueue_scripts', 'ai_styles');
+function ai_styles() {
+    wp_enqueue_style('ai-styles', get_template_directory_uri() . '/ai-modules/ai.css');
+}
