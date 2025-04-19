@@ -18,16 +18,12 @@ class Seokar_General_Settings {
     const CACHE_KEY    = 'seokar_general_settings_cache';
 
     private $settings_schema;
-    private $cache_manager;
 
     public function __construct() {
         $this->init_settings_schema();
         $this->init_hooks();
     }
 
-    /**
-     * تعریف ساختار تنظیمات
-     */
     private function init_settings_schema() {
         $this->settings_schema = apply_filters('seokar_general_settings_schema', [
             'site_logo' => [
@@ -73,35 +69,20 @@ class Seokar_General_Settings {
         ]);
     }
 
-    /**
-     * ثبت هوک‌های وردپرس
-     */
     private function init_hooks() {
         add_action('admin_init', [$this, 'register']);
         add_action('admin_enqueue_scripts', [$this, 'enqueue_assets']);
         add_action('wp_head', [$this, 'inject_analytics_code'], 99);
         add_action('init', [$this, 'handle_maintenance_mode']);
-        
-        // سیستم کش
         add_action('update_option_' . self::OPTION_NAME, [$this, 'clear_cache']);
     }
 
-    /**
-     * بارگذاری فایل‌های CSS/JS
-     */
     public function enqueue_assets($hook) {
         if ($hook === 'toplevel_page_seokar-theme-options') {
-            // ویرایشگر کد
             wp_enqueue_code_editor(['type' => 'text/html']);
-            
-            // رنگ‌پیکر
             wp_enqueue_style('wp-color-picker');
             wp_enqueue_script('wp-color-picker');
-            
-            // آپلودگر مدیا
             wp_enqueue_media();
-            
-            // اسکریپت اختصاصی
             wp_enqueue_script(
                 'seokar-general-settings',
                 get_template_directory_uri() . '/assets/js/admin-general-settings.js',
@@ -112,9 +93,6 @@ class Seokar_General_Settings {
         }
     }
 
-    /**
-     * ثبت تنظیمات در وردپرس
-     */
     public function register() {
         register_setting(
             self::OPTION_GROUP,
@@ -126,7 +104,6 @@ class Seokar_General_Settings {
             ]
         );
 
-        // بخش اصلی
         add_settings_section(
             'seokar_general_section',
             __('تنظیمات اصلی سایت', 'seokar'),
@@ -134,7 +111,6 @@ class Seokar_General_Settings {
             'seokar-theme-options'
         );
 
-        // ثبت تمام فیلدها بر اساس schema
         foreach ($this->settings_schema as $field_id => $schema) {
             add_settings_field(
                 $field_id,
@@ -150,9 +126,10 @@ class Seokar_General_Settings {
         }
     }
 
-    /**
-     * رندر فیلدها به صورت داینامیک
-     */
+    public function render_section_intro() {
+        echo '<p>' . __('در این بخش می‌توانید تنظیمات اصلی سایت خود را انجام دهید.', 'seokar') . '</p>';
+    }
+
     public function render_field($args) {
         $field_id = $args['field_id'];
         $schema   = $args['schema'];
@@ -162,35 +139,27 @@ class Seokar_General_Settings {
             case 'media':
                 echo $this->render_media_field($field_id, $value, $schema);
                 break;
-                
             case 'color':
                 echo $this->render_color_field($field_id, $value, $schema);
                 break;
-                
             case 'textarea':
                 echo $this->render_textarea_field($field_id, $value, $schema);
                 break;
-                
             case 'switch':
                 echo $this->render_switch_field($field_id, $value, $schema);
                 break;
-                
             case 'code':
                 echo $this->render_code_field($field_id, $value, $schema);
                 break;
-                
             default: // text
                 echo $this->render_text_field($field_id, $value, $schema);
         }
-        
+
         if (!empty($schema['description'])) {
             echo '<p class="description">' . esc_html($schema['description']) . '</p>';
         }
     }
 
-    /**
-     * اعتبارسنجی پیشرفته تنظیمات
-     */
     public function sanitize_settings($input) {
         $output = [];
         $errors = new WP_Error();
@@ -208,54 +177,41 @@ class Seokar_General_Settings {
                 $output[$field_id] = $schema['default'];
             }
         }
-        
-        // ذخیره خطاها در ترنزینت
+
         if ($errors->has_errors()) {
             set_transient('seokar_settings_errors', $errors->get_error_messages(), 45);
         }
         
-        // پاکسازی کش
         $this->clear_cache();
         
         return apply_filters('seokar_sanitized_general_settings', $output, $input);
     }
 
-    /**
-     * اعتبارسنجی فیلدها
-     */
     private function validate_field($value, $schema) {
         switch ($schema['type']) {
             case 'media':
                 return esc_url_raw($value);
-                
             case 'color':
-                return $this->validate_hex_color($value);
-                
+                return sanitize_hex_color($value);
             case 'textarea':
                 $value = sanitize_textarea_field($value);
                 if (isset($schema['max_length']) && mb_strlen($value) > $schema['max_length']) {
-                    throw new Exception(__('حداکثر طول مجاز رعایت نشده است', 'seokar'));
+                    throw new Exception(__('حداکثر طول مجاز رعایت نشده است.', 'seokar'));
                 }
                 return $value;
-                
             case 'switch':
                 return (bool) $value;
-                
             case 'code':
                 return wp_kses_post($value);
-                
             default: // text
                 $value = sanitize_text_field($value);
                 if (isset($schema['max_length']) && mb_strlen($value) > $schema['max_length']) {
-                    throw new Exception(__('حداکثر طول مجاز رعایت نشده است', 'seokar'));
+                    throw new Exception(__('حداکثر طول مجاز رعایت نشده است.', 'seokar'));
                 }
                 return $value;
         }
     }
 
-    /**
-     * دریافت مقدار تنظیمات با کش
-     */
     public function get_setting($key, $default = '') {
         $settings = wp_cache_get(self::CACHE_KEY);
         
@@ -267,29 +223,20 @@ class Seokar_General_Settings {
         return $settings[$key] ?? $default;
     }
 
-    /**
-     * پاکسازی کش
-     */
     public function clear_cache() {
         wp_cache_delete(self::CACHE_KEY);
     }
 
-    /**
-     * فعالسازی حالت نگهداری
-     */
     public function handle_maintenance_mode() {
         if ($this->get_setting('maintenance_mode') && !current_user_can('manage_options')) {
             wp_die(
-                '<h1>' . __('سایت در حال تعمیرات است', 'seokar') . '</h1>' .
-                '<p>' . __('به زودی بازمی‌گردیم', 'seokar') . '</p>',
-                503
+                '<h1>' . __('سایت در حال تعمیرات است.', 'seokar') . '</h1><p>' . __('به زودی بازخواهیم گشت.', 'seokar') . '</p>',
+                __('سایت در حال تعمیرات است.', 'seokar'),
+                ['response' => 503]
             );
         }
     }
 
-    /**
-     * تزریق کد آنالیتیکس
-     */
     public function inject_analytics_code() {
         if ($code = $this->get_setting('google_analytics')) {
             echo "<!-- Google Analytics by SeoKar -->\n";
@@ -307,22 +254,19 @@ class Seokar_General_Settings {
         }
     }
 
-    /**********************
-     * رندر فیلدهای سفارشی
-     **********************/
-    
     private function render_media_field($field_id, $value, $schema) {
-        ob_start(); ?>
+        ob_start();
+        ?>
         <div class="seokar-media-uploader">
             <input type="text" 
                    id="<?php echo esc_attr($field_id); ?>" 
                    name="<?php echo esc_attr(self::OPTION_NAME . "[$field_id]"); ?>" 
                    value="<?php echo esc_url($value); ?>" 
                    class="regular-text seokar-media-url">
-            <button type="button" class="button seokar-media-upload" 
-                    data-uploader-title="<?php esc_attr_e('انتخاب تصویر', 'seokar'); ?>"
-                    data-uploader-button-text="<?php esc_attr_e('استفاده به عنوان لوگو', 'seokar'); ?>"
-                    data-mime-types="<?php echo esc_attr(json_encode($schema['mime_types'])); ?>">
+            <button type="button" class="button seokar-media-upload"
+                    data-uploader-title="<?php echo esc_attr(__('انتخاب تصویر', 'seokar')); ?>"
+                    data-uploader-button-text="<?php echo esc_attr(__('استفاده به عنوان لوگو', 'seokar')); ?>"
+                    data-mime-types='<?php echo esc_attr(json_encode($schema['mime_types'])); ?>'>
                 <?php _e('انتخاب تصویر', 'seokar'); ?>
             </button>
             <?php if ($value) : ?>
@@ -335,48 +279,69 @@ class Seokar_General_Settings {
         <?php
         return ob_get_clean();
     }
-    
+
     private function render_color_field($field_id, $value, $schema) {
-        ob_start(); ?>
-        <input type="text" 
-               id="<?php echo esc_attr($field_id); ?>" 
-               name="<?php echo esc_attr(self::OPTION_NAME . "[$field_id]"); ?>" 
-               value="<?php echo esc_attr($value); ?>" 
+        ob_start();
+        ?>
+        <input type="text"
+               id="<?php echo esc_attr($field_id); ?>"
+               name="<?php echo esc_attr(self::OPTION_NAME . "[$field_id]"); ?>"
+               value="<?php echo esc_attr($value); ?>"
                class="seokar-color-picker"
                data-default-color="<?php echo esc_attr($schema['default']); ?>">
         <?php
         return ob_get_clean();
     }
-    
+
+    private function render_textarea_field($field_id, $value, $schema) {
+        ob_start();
+        ?>
+        <textarea id="<?php echo esc_attr($field_id); ?>"
+                  name="<?php echo esc_attr(self::OPTION_NAME . "[$field_id]"); ?>"
+                  rows="5" class="large-text"><?php echo esc_textarea($value); ?></textarea>
+        <?php
+        return ob_get_clean();
+    }
+
     private function render_switch_field($field_id, $value, $schema) {
-        ob_start(); ?>
+        ob_start();
+        ?>
         <label class="seokar-switch">
-            <input type="checkbox" 
-                   id="<?php echo esc_attr($field_id); ?>" 
-                   name="<?php echo esc_attr(self::OPTION_NAME . "[$field_id]"); ?>" 
+            <input type="checkbox"
+                   id="<?php echo esc_attr($field_id); ?>"
+                   name="<?php echo esc_attr(self::OPTION_NAME . "[$field_id]"); ?>"
                    value="1" <?php checked($value, true); ?>>
             <span class="seokar-slider round"></span>
         </label>
         <?php
         return ob_get_clean();
     }
-    
+
     private function render_code_field($field_id, $value, $schema) {
-        ob_start(); ?>
-        <textarea id="<?php echo esc_attr($field_id); ?>" 
-                  name="<?php echo esc_attr(self::OPTION_NAME . "[$field_id]"); ?>" 
-                  class="seokar-code-editor" 
+        ob_start();
+        ?>
+        <textarea id="<?php echo esc_attr($field_id); ?>"
+                  name="<?php echo esc_attr(self::OPTION_NAME . "[$field_id]"); ?>"
+                  class="seokar-code-editor"
                   data-language="<?php echo esc_attr($schema['language']); ?>"
                   rows="5"><?php echo esc_textarea($value); ?></textarea>
         <?php
         return ob_get_clean();
     }
 
-    /**
-     * نمایش صفحه تنظیمات
-     */
+    private function render_text_field($field_id, $value, $schema) {
+        ob_start();
+        ?>
+        <input type="text"
+               id="<?php echo esc_attr($field_id); ?>"
+               name="<?php echo esc_attr(self::OPTION_NAME . "[$field_id]"); ?>"
+               value="<?php echo esc_attr($value); ?>"
+               class="regular-text">
+        <?php
+        return ob_get_clean();
+    }
+
     public function render() {
-        // نمایش خطاهای اعتبارسنجی
         if ($errors = get_transient('seokar_settings_errors')) {
             foreach ($errors as $error) {
                 echo '<div class="notice notice-error is-dismissible"><p>' . esc_html($error) . '</p></div>';
@@ -389,32 +354,24 @@ class Seokar_General_Settings {
                 <?php 
                 settings_fields(self::OPTION_GROUP);
                 do_settings_sections('seokar-theme-options');
-                submit_button(__('ذخیره تنظیمات', 'seokar'), 'primary', 'submit', false);
+                submit_button(__('ذخیره تنظیمات', 'seokar'));
                 ?>
                 <button type="button" class="button button-secondary seokar-reset-section">
                     <?php _e('بازنشانی بخش', 'seokar'); ?>
                 </button>
             </form>
-            
             <div class="seokar-settings-sidebar">
                 <div class="seokar-settings-card">
                     <h3><?php _e('راهنما', 'seokar'); ?></h3>
-                    <p><?php _e('تنظیمات اصلی سایت را در این بخش مدیریت کنید.', 'seokar'); ?></p>
+                    <p><?php _e('در این بخش می‌توانید تنظیمات قالب را مدیریت کنید.', 'seokar'); ?></p>
                 </div>
-                
                 <div class="seokar-settings-card">
                     <h3><?php _e('سیستم', 'seokar'); ?></h3>
-                    <ul>
-                        <li><strong>PHP:</strong> <?php echo phpversion(); ?></li>
-                        <li><strong>وردپرس:</strong> <?php echo get_bloginfo('version'); ?></li>
-                        <li><strong>قالب:</strong> <?php echo wp_get_theme()->get('Version'); ?></li>
-                    </ul>
+                    <p><?php _e('اطلاعات سیستم و تنظیمات پیشرفته.', 'seokar'); ?></p>
                 </div>
             </div>
         </div>
         <?php
     }
 }
-
-// راه‌اندازی
-new Seokar_General_Settings();
+?>
