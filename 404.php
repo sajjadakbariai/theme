@@ -1,6 +1,6 @@
 <?php
 /**
- * The template for displaying 404 pages (not found)
+ * The template for displaying 404 pages (Not Found)
  *
  * @package SeoKar
  * @version 2.0.0
@@ -16,11 +16,15 @@ get_header(); ?>
             </header><!-- .page-header -->
 
             <div class="page-content" itemprop="mainContentOfPage">
-                <p><?php esc_html_e('It looks like nothing was found at this location. Maybe try one of the links below or a search?', 'seokar'); ?></p>
+                <p><?php esc_html_e('It looks like nothing was found at this location. Maybe try a search or browse the links below.', 'seokar'); ?></p>
 
                 <div class="error-search">
                     <?php get_search_form(); ?>
                 </div>
+
+                <a href="<?php echo esc_url(home_url('/')); ?>" class="btn btn-primary error-home-btn">
+                    <?php esc_html_e('Back to Home', 'seokar'); ?>
+                </a>
 
                 <div class="error-widgets">
                     <div class="widget widget_categories">
@@ -32,7 +36,7 @@ get_header(); ?>
                                 'order'      => 'DESC',
                                 'show_count' => 1,
                                 'title_li'   => '',
-                                'number'     => 10,
+                                'number'     => 5,
                             ));
                             ?>
                         </ul>
@@ -42,16 +46,22 @@ get_header(); ?>
                         <h2 class="widget-title"><?php esc_html_e('Latest Posts', 'seokar'); ?></h2>
                         <ul>
                             <?php
-                            $recent_posts = wp_get_recent_posts(array(
-                                'numberposts' => 5,
-                                'post_status' => 'publish',
+                            $recent_posts = new WP_Query(array(
+                                'posts_per_page' => 5,
+                                'post_status'    => 'publish',
                             ));
-                            foreach ($recent_posts as $post) :
-                                ?>
-                                <li>
-                                    <a href="<?php echo esc_url(get_permalink($post['ID'])); ?>"><?php echo esc_html($post['post_title']); ?></a>
-                                </li>
-                            <?php endforeach; ?>
+
+                            if ($recent_posts->have_posts()) :
+                                while ($recent_posts->have_posts()) : $recent_posts->the_post();
+                                    ?>
+                                    <li>
+                                        <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
+                                    </li>
+                                    <?php
+                                endwhile;
+                                wp_reset_postdata();
+                            endif;
+                            ?>
                         </ul>
                     </div><!-- .widget -->
 
@@ -60,9 +70,11 @@ get_header(); ?>
                         <?php
                         wp_tag_cloud(array(
                             'smallest' => 12,
-                            'largest'  => 12,
+                            'largest'  => 18,
                             'unit'     => 'px',
-                            'number'   => 50,
+                            'number'   => 20,
+                            'orderby'  => 'count',
+                            'order'    => 'DESC',
                         ));
                         ?>
                     </div><!-- .widget -->
@@ -74,3 +86,4 @@ get_header(); ?>
 
 <?php
 get_footer();
+?>
