@@ -82,3 +82,56 @@ add_action('wp_enqueue_scripts', 'ai_styles');
 function ai_styles() {
     wp_enqueue_style('ai-styles', get_template_directory_uri() . '/ai-modules/ai.css');
 }
+// Register and localize widget JS
+function seokar_widgets_js_localization() {
+    wp_enqueue_script('seokar-widgets');
+    
+    wp_localize_script('seokar-widgets', 'seokarWidgets', array(
+        'ajaxurl' => admin_url('admin-ajax.php'),
+        'nonce' => wp_create_nonce('seokar_widgets_nonce'),
+        'subscribeText' => __('Subscribe', 'seokar'),
+        'submittingText' => __('Submitting...', 'seokar'),
+        'errorText' => __('An error occurred. Please try again.', 'seokar')
+    ));
+}
+add_action('wp_enqueue_scripts', 'seokar_widgets_js_localization');
+
+// AJAX handler for post views
+function seokar_update_post_views() {
+    check_ajax_referer('seokar_widgets_nonce', 'security');
+    
+    if (isset($_POST['post_id'])) {
+        $post_id = absint($_POST['post_id']);
+        $count = get_post_meta($post_id, 'post_views_count', true);
+        $count = $count ? $count + 1 : 1;
+        update_post_meta($post_id, 'post_views_count', $count);
+        wp_send_json_success();
+    }
+    
+    wp_send_json_error();
+}
+add_action('wp_ajax_seokar_update_post_views', 'seokar_update_post_views');
+add_action('wp_ajax_nopriv_seokar_update_post_views', 'seokar_update_post_views');
+
+// AJAX handler for newsletter subscription
+function seokar_newsletter_subscribe() {
+    check_ajax_referer('seokar_widgets_nonce', 'security');
+    
+    if (!isset($_POST['email']) || !is_email($_POST['email'])) {
+        wp_send_json_error(__('Please enter a valid email address.', 'seokar'));
+    }
+    
+    $email = sanitize_email($_POST['email']);
+    
+    // Here you can add your subscription logic (save to database, send to email service, etc.)
+    // For example:
+    // $subscribed = save_newsletter_subscriber($email);
+    
+    // For demo purposes, we'll just return a success message
+    wp_send_json_success(array(
+        'message' => __('Thank you');
+
+function seokar_enqueue_font_awesome() {
+    wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css', array(), '5.15.4');
+}
+add_action('wp_enqueue_scripts', 'seokar_enqueue_font_awesome');
