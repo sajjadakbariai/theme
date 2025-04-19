@@ -1,7 +1,8 @@
 <?php
 /**
- * ماژول پیشنهاد محتوای هوشمند - نسخه حرفه‌ای
- * با بهینه‌سازی کش، سازگاری AMP و قابلیت‌های پیشرفته
+ * ماژول پیشنهاد محتوای هوشمند - نسخه نهایی
+ * با قابلیت‌های: کش بهینه، سازگاری AMP، پشتیبانی از اسلایدر، تنظیمات انعطاف‌پذیر
+ * آدرس: /wp-content/themes/your-theme/ai-modules/content-recommendation.php
  */
 
 if (!defined('ABSPATH')) {
@@ -58,7 +59,7 @@ function ai_get_related_posts($post_id, $posts_per_page = null) {
         'posts_per_page' => $posts_per_page,
         'ignore_sticky_posts' => 1,
         'orderby' => 'rand',
-        'fields' => 'ids', // فقط IDها را دریافت می‌کنیم
+        'fields' => 'ids',
     );
 
     if (!empty($tags)) {
@@ -157,4 +158,47 @@ function ai_display_related_posts($post_id, $posts_per_page = null) {
     return $output;
 }
 
-// بقیه کدها مانند قبل...
+/**
+ * اضافه کردن مطالب مرتبط به محتوای پست
+ */
+function ai_add_related_posts_to_content($content) {
+    if (is_single() && in_the_loop() && is_main_query()) {
+        $content .= ai_display_related_posts(get_the_ID());
+    }
+    return $content;
+}
+add_filter('the_content', 'ai_add_related_posts_to_content');
+
+/**
+ * پاک کردن کش هنگام ذخیره یا به‌روزرسانی پست
+ */
+function ai_clear_related_posts_cache($post_id) {
+    if (wp_is_post_revision($post_id)) {
+        return;
+    }
+    
+    // پاک کردن کش برای تمام حالت‌های ممکن (1 تا 20)
+    for ($i = 1; $i <= 20; $i++) {
+        delete_transient('ai_related_posts_' . $post_id . '_' . $i);
+    }
+    
+    // اکشن برای مواقعی که نیاز به پاکسازی دستی است
+    do_action('ai_related_posts_cache_cleared', $post_id);
+}
+add_action('save_post', 'ai_clear_related_posts_cache');
+add_action('delete_post', 'ai_clear_related_posts_cache');
+
+/**
+ * پاک کردن تمام کش‌های مرتبط هنگام تغییر تنظیمات
+ */
+function ai_clear_all_related_posts_cache() {
+    global $wpdb;
+    $wpdb->query(
+        "DELETE FROM $wpdb->options WHERE option_name LIKE '_transient_ai_related_posts_%'"
+    );
+    $wpdb->query(
+        "DELETE FROM $wpdb->options WHERE option_name LIKE '_transient_timeout_ai_related_posts_%'"
+    );
+}
+add_action('switch_theme', 'ai_clear_all_related_posts_cache');
+add_action('ai_clear_all_related_posts_cache', 'ai_clear_all_related_posts_cache');
