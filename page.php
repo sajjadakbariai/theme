@@ -3,41 +3,52 @@
  * The template for displaying all pages
  *
  * @package SeoKar
- * @version 2.0.0
+ * @version 2.2.0
  */
 
 get_header(); ?>
 
 <div class="container">
     <div class="row">
-        <div id="primary" class="content-area <?php echo (is_active_sidebar('sidebar-page') ? 'has-sidebar' : 'no-sidebar'); ?>">
+        <?php
+        $sidebar_active = is_active_sidebar('sidebar-page');
+        $content_classes = $sidebar_active ? 'col-lg-8 has-sidebar' : 'col-12 no-sidebar';
+        ?>
+
+        <div id="primary" class="content-area <?php echo esc_attr($content_classes); ?>">
             <main id="main" class="site-main" role="main">
 
                 <?php
-                while (have_posts()) :
-                    the_post();
+                if (have_posts()) :
+                    while (have_posts()) :
+                        the_post();
 
-                    // Include the page content template
-                    get_template_part('template-parts/content', 'page');
+                        // Include the page content template
+                        get_template_part('template-parts/content', 'page');
 
-                    // If comments are open or we have at least one comment, load up the comment template
-                    if (comments_open() || get_comments_number()) :
-                        comments_template();
-                    endif;
+                        // Load comments if open and not password protected
+                        if (!post_password_required() && (comments_open() || get_comments_number())) :
+                            comments_template();
+                        endif;
 
-                endwhile; // End of the loop.
+                    endwhile;
+                else :
+                    // If no content, display fallback template
+                    get_template_part('template-parts/content', 'none');
+                endif;
                 ?>
 
             </main><!-- #main -->
         </div><!-- #primary -->
 
-        <?php
-        if (is_active_sidebar('sidebar-page')) {
-            get_sidebar('page');
-        }
-        ?>
+        <?php if ($sidebar_active) : ?>
+            <aside id="secondary" class="widget-area col-lg-4">
+                <?php get_sidebar('page'); ?>
+            </aside>
+        <?php endif; ?>
     </div><!-- .row -->
 </div><!-- .container -->
 
 <?php
 get_footer();
+?>
