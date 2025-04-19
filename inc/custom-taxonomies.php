@@ -234,4 +234,38 @@ function seokar_register_taxonomy_rest_fields() {
         ]
     );
 }
+/**
+ * Enqueue admin styles and scripts
+ *
+ * این تابع فایل‌های CSS و JS مورد نیاز برای بخش مدیریت را بارگذاری می‌کند.
+ */
+function seokar_enqueue_taxonomy_admin_assets($hook) {
+    // فقط در صفحات مربوط به تاکسونومی‌ها بارگذاری شود
+    if ($hook === 'edit-tags.php' || $hook === 'term.php') {
+        // CSS
+        wp_enqueue_style(
+            'seokar-taxonomy-admin',
+            SEOKAR_DIR_URI . '/inc/admin/css/admin-taxonomies.css',
+            [],
+            filemtime(SEOKAR_DIR . '/inc/admin/css/admin-taxonomies.css')
+        );
+
+        // JS
+        wp_enqueue_media(); // برای استفاده از مدیا آپلودر وردپرس
+        wp_enqueue_script(
+            'seokar-taxonomy-admin',
+            SEOKAR_DIR_URI . '/inc/admin/js/admin-taxonomies.js',
+            ['jquery'],
+            filemtime(SEOKAR_DIR . '/inc/admin/js/admin-taxonomies.js'),
+            true
+        );
+
+        // انتقال داده‌ها به JS
+        wp_localize_script('seokar-taxonomy-admin', 'seokarTaxonomyData', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'   => wp_create_nonce('seokar_taxonomy_nonce'),
+        ]);
+    }
+}
+add_action('admin_enqueue_scripts', 'seokar_enqueue_taxonomy_admin_assets');
 add_action('rest_api_init', 'seokar_register_taxonomy_rest_fields');
