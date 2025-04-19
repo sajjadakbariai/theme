@@ -14,7 +14,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="profile" href="https://gmpg.org/xfn/11">
     <link rel="pingback" href="<?php bloginfo('pingback_url'); ?>">
-    
+
+    <?php get_template_part('template-parts/seo/meta-tags'); ?>
     <?php // Preload critical resources ?>
     <link rel="preload" href="<?php echo esc_url(get_template_directory_uri()); ?>/assets/fonts/vazir.woff2" as="font" type="font/woff2" crossorigin>
     
