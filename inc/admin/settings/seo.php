@@ -3953,3 +3953,787 @@ class SeoKar_Settings_API {
         return $output;
     }
 }
+<?php
+/**
+ * SEO Framework Helpers Class
+ * 
+ * Contains various helper functions used throughout the plugin
+ */
+
+class SeoKar_Helpers {
+
+    private static $_instance = null;
+
+    public static function instance() {
+        if (is_null(self::$_instance)) {
+            self::$_instance = new self();
+        }
+        return self::$_instance;
+    }
+
+    /**
+     * Get current URL
+     */
+    public function get_current_url() {
+        global $wp;
+        return home_url(add_query_arg(array(), $wp->request));
+    }
+
+    /**
+     * Get post types with their labels
+     */
+    public function get_post_types() {
+        $post_types = get_post_types(array(
+            'public' => true
+        ), 'objects');
+        
+        $types = array();
+        foreach ($post_types as $post_type) {
+            if ($post_type->name === 'attachment') continue;
+            $types[$post_type->name] = $post_type->labels->name;
+        }
+        
+        return $types;
+    }
+
+    /**
+     * Get taxonomies with their labels
+     */
+    public function get_taxonomies() {
+        $taxonomies = get_taxonomies(array(
+            'public' => true
+        ), 'objects');
+        
+        $taxes = array();
+        foreach ($taxonomies as $taxonomy) {
+            $taxes[$taxonomy->name] = $taxonomy->labels->name;
+        }
+        
+        return $taxes;
+    }
+
+    /**
+     * Get social media platforms
+     */
+    public function get_social_platforms() {
+        return array(
+            'facebook' => 'Facebook',
+            'twitter' => 'Twitter',
+            'instagram' => 'Instagram',
+            'linkedin' => 'LinkedIn',
+            'pinterest' => 'Pinterest',
+            'youtube' => 'YouTube',
+            'tiktok' => 'TikTok'
+        );
+    }
+
+    /**
+     * Generate a snippet preview
+     */
+    public function generate_snippet_preview($title, $description, $url) {
+        $html = '<div class="seokar-snippet-preview">';
+        $html .= '<div class="seokar-snippet-title">' . esc_html($title) . '</div>';
+        $html .= '<div class="seokar-snippet-url">' . esc_url($url) . '</div>';
+        $html .= '<div class="seokar-snippet-description">' . esc_html($description) . '</div>';
+        $html .= '</div>';
+        
+        return $html;
+    }
+
+    /**
+     * Check if WooCommerce is active
+     */
+    public function is_woocommerce_active() {
+        return class_exists('WooCommerce');
+    }
+
+    /**
+     * Check if Elementor is active
+     */
+    public function is_elementor_active() {
+        return did_action('elementor/loaded');
+    }
+
+    /**
+     * Check if WPML is active
+     */
+    public function is_wpml_active() {
+        return defined('ICL_SITEPRESS_VERSION');
+    }
+
+    /**
+     * Get schema types
+     */
+    public function get_schema_types() {
+        return array(
+            'Article' => __('Article', 'seokar'),
+            'NewsArticle' => __('News Article', 'seokar'),
+            'BlogPosting' => __('Blog Post', 'seokar'),
+            'WebPage' => __('Web Page', 'seokar'),
+            'Product' => __('Product', 'seokar'),
+            'Recipe' => __('Recipe', 'seokar'),
+            'Event' => __('Event', 'seokar'),
+            'FAQPage' => __('FAQ Page', 'seokar'),
+            'HowTo' => __('How-To', 'seokar'),
+            'LocalBusiness' => __('Local Business', 'seokar'),
+            'Organization' => __('Organization', 'seokar'),
+            'Person' => __('Person', 'seokar'),
+            'Review' => __('Review', 'seokar'),
+            'VideoObject' => __('Video', 'seokar')
+        );
+    }
+
+    /**
+     * Get default schema data for type
+     */
+    public function get_default_schema_data($type) {
+        $data = array(
+            'name' => '',
+            'description' => ''
+        );
+        
+        switch ($type) {
+            case 'Article':
+            case 'NewsArticle':
+            case 'BlogPosting':
+                $data['headline'] = '';
+                $data['datePublished'] = '';
+                $data['dateModified'] = '';
+                $data['author'] = '';
+                $data['publisher'] = '';
+                $data['image'] = '';
+                break;
+                
+            case 'Product':
+                $data['brand'] = '';
+                $data['sku'] = '';
+                $data['price'] = '';
+                $data['priceCurrency'] = 'USD';
+                $data['availability'] = 'InStock';
+                $data['image'] = '';
+                break;
+                
+            case 'LocalBusiness':
+                $data['address'] = array(
+                    'streetAddress' => '',
+                    'addressLocality' => '',
+                    'addressRegion' => '',
+                    'postalCode' => '',
+                    'addressCountry' => ''
+                );
+                $data['telephone'] = '';
+                $data['openingHoursSpecification'] = array();
+                $data['priceRange'] = '$$';
+                break;
+                
+            case 'Event':
+                $data['startDate'] = '';
+                $data['endDate'] = '';
+                $data['location'] = array(
+                    'name' => '',
+                    'address' => array(
+                        'streetAddress' => '',
+                        'addressLocality' => '',
+                        'addressRegion' => '',
+                        'postalCode' => '',
+                        'addressCountry' => ''
+                    )
+                );
+                $data['offers'] = array(
+                    'url' => '',
+                    'price' => '',
+                    'priceCurrency' => 'USD'
+                );
+                break;
+        }
+        
+        return $data;
+    }
+
+    /**
+     * Get breadcrumb items for current page
+     */
+    public function get_breadcrumb_items() {
+        $items = array();
+        
+        // Home page
+        $items[] = array(
+            'name' => __('Home', 'seokar'),
+            'url' => home_url('/')
+        );
+        
+        if (is_singular()) {
+            global $post;
+            
+            // Post type archive
+            $post_type = get_post_type_object(get_post_type($post));
+            if ($post_type->has_archive) {
+                $items[] = array(
+                    'name' => $post_type->labels->name,
+                    'url' => get_post_type_archive_link(get_post_type())
+                );
+            }
+            
+            // Parent pages
+            if (is_post_type_hierarchical(get_post_type())) {
+                $ancestors = get_post_ancestors($post);
+                if (!empty($ancestors)) {
+                    $ancestors = array_reverse($ancestors);
+                    foreach ($ancestors as $ancestor) {
+                        $items[] = array(
+                            'name' => get_the_title($ancestor),
+                            'url' => get_permalink($ancestor)
+                        );
+                    }
+                }
+            }
+            
+            // Current page
+            $items[] = array(
+                'name' => get_the_title(),
+                'url' => get_permalink()
+            );
+        } elseif (is_archive()) {
+            if (is_category() || is_tag() || is_tax()) {
+                $term = get_queried_object();
+                $taxonomy = get_taxonomy($term->taxonomy);
+                
+                // Taxonomy archive
+                $items[] = array(
+                    'name' => $taxonomy->labels->name,
+                    'url' => get_post_type_archive_link($taxonomy->object_type[0])
+                );
+                
+                // Parent terms
+                if (is_taxonomy_hierarchical($term->taxonomy)) {
+                    $ancestors = get_ancestors($term->term_id, $term->taxonomy);
+                    if (!empty($ancestors)) {
+                        $ancestors = array_reverse($ancestors);
+                        foreach ($ancestors as $ancestor) {
+                            $ancestor_term = get_term($ancestor, $term->taxonomy);
+                            $items[] = array(
+                                'name' => $ancestor_term->name,
+                                'url' => get_term_link($ancestor_term)
+                            );
+                        }
+                    }
+                }
+                
+                // Current term
+                $items[] = array(
+                    'name' => $term->name,
+                    'url' => get_term_link($term)
+                );
+            } elseif (is_author()) {
+                $author = get_queried_object();
+                $items[] = array(
+                    'name' => $author->display_name,
+                    'url' => get_author_posts_url($author->ID)
+                );
+            } elseif (is_date()) {
+                $items[] = array(
+                    'name' => get_the_date(),
+                    'url' => get_day_link(get_the_date('Y'), get_the_date('m'), get_the_date('d'))
+                );
+            }
+        } elseif (is_search()) {
+            $items[] = array(
+                'name' => sprintf(__('Search Results for "%s"', 'seokar'), get_search_query()),
+                'url' => get_search_link()
+            );
+        } elseif (is_404()) {
+            $items[] = array(
+                'name' => __('Page Not Found', 'seokar'),
+                'url' => home_url('/404')
+            );
+        }
+        
+        return $items;
+    }
+
+    /**
+     * Get image data for schema
+     */
+    public function get_image_data($image_id) {
+        $image = wp_get_attachment_image_src($image_id, 'full');
+        if (!$image) {
+            return false;
+        }
+        
+        return array(
+            '@type' => 'ImageObject',
+            'url' => $image[0],
+            'width' => $image[1],
+            'height' => $image[2]
+        );
+    }
+
+    /**
+     * Get user social profiles
+     */
+    public function get_user_social_profiles($user_id) {
+        $profiles = array();
+        $social_platforms = $this->get_social_platforms();
+        
+        foreach ($social_platforms as $key => $name) {
+            $url = get_user_meta($user_id, $key . '_url', true);
+            if (!empty($url)) {
+                $profiles[$key] = $url;
+            }
+        }
+        
+        return $profiles;
+    }
+
+    /**
+     * Sanitize schema data
+     */
+    public function sanitize_schema_data($data) {
+        if (!is_array($data)) {
+            return array();
+        }
+        
+        $sanitized = array();
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                $sanitized[$key] = $this->sanitize_schema_data($value);
+            } else {
+                $sanitized[$key] = sanitize_text_field($value);
+            }
+        }
+        
+        return $sanitized;
+    }
+}
+
+/**
+ * SEO Framework Integration: WooCommerce
+ * 
+ * Handles WooCommerce-specific SEO functionality
+ */
+
+class SeoKar_WooCommerce {
+
+    private static $_instance = null;
+
+    public static function instance() {
+        if (is_null(self::$_instance)) {
+            self::$_instance = new self();
+        }
+        return self::$_instance;
+    }
+
+    public function __construct() {
+        if (!SeoKar_Helpers::instance()->is_woocommerce_active()) {
+            return;
+        }
+        
+        add_filter('seokar_registered_settings', array($this, 'add_woocommerce_settings'));
+        add_action('seokar_schema_before_output', array($this, 'add_woocommerce_schema'));
+        add_filter('seokar_meta_box_post_types', array($this, 'add_product_meta_box'));
+    }
+
+    /**
+     * Add WooCommerce settings
+     */
+    public function add_woocommerce_settings($settings) {
+        $settings['woocommerce'] = array(
+            array(
+                'id' => 'product_title_template',
+                'name' => __('Product Title Template', 'seokar'),
+                'desc' => __('Template for product titles. Available tags: {title}, {sitename}, {sep}, {price}', 'seokar'),
+                'type' => 'text',
+                'std' => '{title} {sep} {sitename}'
+            ),
+            array(
+                'id' => 'product_description_template',
+                'name' => __('Product Description Template', 'seokar'),
+                'desc' => __('Template for product descriptions. Available tags: {excerpt}, {title}, {price}, {sku}', 'seokar'),
+                'type' => 'textarea',
+                'std' => '{excerpt}'
+            ),
+            array(
+                'id' => 'enable_product_schema',
+                'name' => __('Enable Product Schema', 'seokar'),
+                'desc' => __('Add Product schema markup for WooCommerce products', 'seokar'),
+                'type' => 'checkbox',
+                'std' => '1'
+            ),
+            array(
+                'id' => 'enable_woocommerce_sitemap',
+                'name' => __('Include Products in Sitemap', 'seokar'),
+                'desc' => __('Add WooCommerce products to the XML sitemap', 'seokar'),
+                'type' => 'checkbox',
+                'std' => '1'
+            )
+        );
+        
+        return $settings;
+    }
+
+    /**
+     * Add WooCommerce schema
+     */
+    public function add_woocommerce_schema($schema) {
+        if (!is_singular('product')) {
+            return $schema;
+        }
+        
+        global $post;
+        $product = wc_get_product($post->ID);
+        
+        if (!$product) {
+            return $schema;
+        }
+        
+        // Add Product schema
+        $product_schema = array(
+            '@type' => 'Product',
+            '@id' => get_permalink() . '#product',
+            'name' => $product->get_name(),
+            'description' => $product->get_short_description() ?: $product->get_description(),
+            'sku' => $product->get_sku(),
+            'brand' => array(
+                '@type' => 'Brand',
+                'name' => $product->get_attribute('brand') ?: get_bloginfo('name')
+            ),
+            'offers' => array(
+                '@type' => 'Offer',
+                'price' => $product->get_price(),
+                'priceCurrency' => get_woocommerce_currency(),
+                'priceValidUntil' => date('Y-m-d', strtotime('+1 year')),
+                'itemCondition' => 'https://schema.org/NewCondition',
+                'availability' => $product->is_in_stock() ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+                'url' => get_permalink(),
+                'seller' => array(
+                    '@type' => 'Organization',
+                    'name' => get_bloginfo('name')
+                )
+            )
+        );
+        
+        // Add product image
+        $image_id = $product->get_image_id();
+        if ($image_id) {
+            $product_schema['image'] = SeoKar_Helpers::instance()->get_image_data($image_id);
+        }
+        
+        // Add product reviews
+        $reviews = $this->get_product_reviews($product);
+        if (!empty($reviews)) {
+            $product_schema['aggregateRating'] = array(
+                '@type' => 'AggregateRating',
+                'ratingValue' => $product->get_average_rating(),
+                'reviewCount' => $product->get_rating_count()
+            );
+            
+            $product_schema['review'] = $reviews;
+        }
+        
+        $schema['@graph'][] = $product_schema;
+        
+        return $schema;
+    }
+
+    /**
+     * Get product reviews for schema
+     */
+    private function get_product_reviews($product) {
+        $reviews = array();
+        $args = array(
+            'post_id' => $product->get_id(),
+            'status' => 'approve',
+            'type' => 'review'
+        );
+        
+        $comments = get_comments($args);
+        foreach ($comments as $comment) {
+            $rating = get_comment_meta($comment->comment_ID, 'rating', true);
+            
+            $reviews[] = array(
+                '@type' => 'Review',
+                'reviewRating' => array(
+                    '@type' => 'Rating',
+                    'ratingValue' => $rating,
+                    'bestRating' => '5',
+                    'worstRating' => '1'
+                ),
+                'author' => array(
+                    '@type' => 'Person',
+                    'name' => $comment->comment_author
+                ),
+                'datePublished' => $comment->comment_date,
+                'description' => $comment->comment_content
+            );
+        }
+        
+        return $reviews;
+    }
+
+    /**
+     * Add product to meta box post types
+     */
+    public function add_product_meta_box($post_types) {
+        $post_types[] = 'product';
+        return $post_types;
+    }
+}
+
+/**
+ * SEO Framework Integration: Elementor
+ * 
+ * Handles Elementor-specific SEO functionality
+ */
+
+class SeoKar_Elementor {
+
+    private static $_instance = null;
+
+    public static function instance() {
+        if (is_null(self::$_instance)) {
+            self::$_instance = new self();
+        }
+        return self::$_instance;
+    }
+
+    public function __construct() {
+        if (!SeoKar_Helpers::instance()->is_elementor_active()) {
+            return;
+        }
+        
+        add_action('elementor/editor/after_enqueue_scripts', array($this, 'enqueue_editor_scripts'));
+        add_action('elementor/editor/footer', array($this, 'add_editor_meta_box'));
+        add_filter('elementor/document/save/data', array($this, 'save_elementor_seo_data'));
+    }
+
+    /**
+     * Enqueue editor scripts
+     */
+    public function enqueue_editor_scripts() {
+        wp_enqueue_script(
+            'seokar-elementor-editor',
+            SEOKAR_ASSETS_URL . '/js/elementor-editor.js',
+            array('jquery', 'elementor-editor'),
+            SEOKAR_VERSION,
+            true
+        );
+        
+        wp_localize_script('seokar-elementor-editor', 'seokar_elementor', array(
+            'nonce' => wp_create_nonce('seokar_elementor_nonce'),
+            'i18n' => array(
+                'seo_settings' => __('SEO Settings', 'seokar'),
+                'title' => __('SEO Title', 'seokar'),
+                'description' => __('Meta Description', 'seokar'),
+                'keywords' => __('Keywords', 'seokar'),
+                'save' => __('Save', 'seokar'),
+                'cancel' => __('Cancel', 'seokar')
+            )
+        ));
+    }
+
+    /**
+     * Add meta box to Elementor editor
+     */
+    public function add_editor_meta_box() {
+        global $post;
+        
+        $values = get_post_meta($post->ID, '_seokar_settings', true);
+        $defaults = array(
+            'title' => '',
+            'description' => '',
+            'keywords' => ''
+        );
+        
+        $values = wp_parse_args($values, $defaults);
+        ?>
+        <div id="seokar-elementor-modal" style="display:none;">
+            <div class="seokar-elementor-form">
+                <div class="elementor-form-fields">
+                    <div class="elementor-form-field">
+                        <label for="seokar-elementor-title"><?php _e('SEO Title', 'seokar'); ?></label>
+                        <input type="text" id="seokar-elementor-title" value="<?php echo esc_attr($values['title']); ?>" class="elementor-form-field-text">
+                    </div>
+                    
+                    <div class="elementor-form-field">
+                        <label for="seokar-elementor-description"><?php _e('Meta Description', 'seokar'); ?></label>
+                        <textarea id="seokar-elementor-description" class="elementor-form-field-textarea"><?php echo esc_textarea($values['description']); ?></textarea>
+                    </div>
+                    
+                    <div class="elementor-form-field">
+                        <label for="seokar-elementor-keywords"><?php _e('Keywords', 'seokar'); ?></label>
+                        <input type="text" id="seokar-elementor-keywords" value="<?php echo esc_attr($values['keywords']); ?>" class="elementor-form-field-text">
+                        <p class="elementor-form-field-help"><?php _e('Comma separated list of keywords', 'seokar'); ?></p>
+                    </div>
+                </div>
+                
+                <div class="elementor-form-buttons">
+                    <button type="button" class="elementor-button elementor-button-default" id="seokar-elementor-cancel"><?php _e('Cancel', 'seokar'); ?></button>
+                    <button type="button" class="elementor-button elementor-button-success" id="seokar-elementor-save"><?php _e('Save', 'seokar'); ?></button>
+                </div>
+            </div>
+        </div>
+        <?php
+    }
+
+    /**
+     * Save Elementor SEO data
+     */
+    public function save_elementor_seo_data($data) {
+        if (!isset($_POST['seokar_elementor_data']) || !wp_verify_nonce($_POST['_nonce'], 'seokar_elementor_nonce')) {
+            return $data;
+        }
+        
+        $seo_data = json_decode(wp_unslash($_POST['seokar_elementor_data']), true);
+        $post_id = $_POST['post_id'];
+        
+        $current = get_post_meta($post_id, '_seokar_settings', true);
+        if (!is_array($current)) {
+            $current = array();
+        }
+        
+        $current['title'] = sanitize_text_field($seo_data['title']);
+        $current['description'] = sanitize_textarea_field($seo_data['description']);
+        $current['keywords'] = sanitize_text_field($seo_data['keywords']);
+        
+        update_post_meta($post_id, '_seokar_settings', $current);
+        
+        return $data;
+    }
+}
+
+/**
+ * SEO Framework Integration: WPML
+ * 
+ * Handles WPML-specific SEO functionality
+ */
+
+class SeoKar_WPML {
+
+    private static $_instance = null;
+
+    public static function instance() {
+        if (is_null(self::$_instance)) {
+            self::$_instance = new self();
+        }
+        return self::$_instance;
+    }
+
+    public function __construct() {
+        if (!SeoKar_Helpers::instance()->is_wpml_active()) {
+            return;
+        }
+        
+        add_action('wpml_admin_menu_configure', array($this, 'add_wpml_menu_item'));
+        add_action('admin_init', array($this, 'register_wpml_settings'));
+        add_filter('seokar_meta_box_post_types', array($this, 'filter_meta_box_post_types'));
+    }
+
+    /**
+     * Add WPML menu item
+     */
+    public function add_wpml_menu_item() {
+        global $sitepress;
+        
+        $sitepress->add_menu_item(
+            'seokar-wpml-settings',
+            array(
+                'parent_slug' => 'seokar-settings',
+                'page_title' => __('Multilingual SEO', 'seokar'),
+                'menu_title' => __('Multilingual SEO', 'seokar'),
+                'capability' => 'manage_options',
+                'menu_slug' => 'seokar-wpml-settings',
+                'function' => array($this, 'render_wpml_settings_page')
+            )
+        );
+    }
+
+    /**
+     * Register WPML settings
+     */
+    public function register_wpml_settings() {
+        register_setting('seokar_wpml_settings', 'seokar_wpml_settings');
+        
+        add_settings_section(
+            'seokar_wpml_main',
+            __('Multilingual SEO Settings', 'seokar'),
+            '__return_false',
+            'seokar_wpml_settings'
+        );
+        
+        add_settings_field(
+            'hreflang',
+            __('Hreflang Tags', 'seokar'),
+            array($this, 'hreflang_callback'),
+            'seokar_wpml_settings',
+            'seokar_wpml_main'
+        );
+        
+        add_settings_field(
+            'translation_meta',
+            __('Meta Translation', 'seokar'),
+            array($this, 'translation_meta_callback'),
+            'seokar_wpml_settings',
+            'seokar_wpml_main'
+        );
+    }
+
+    /**
+     * Render WPML settings page
+     */
+    public function render_wpml_settings_page() {
+        ?>
+        <div class="wrap">
+            <h1><?php _e('Multilingual SEO Settings', 'seokar'); ?></h1>
+            
+            <form method="post" action="options.php">
+                <?php
+                settings_fields('seokar_wpml_settings');
+                do_settings_sections('seokar_wpml_settings');
+                submit_button();
+                ?>
+            </form>
+        </div>
+        <?php
+    }
+
+    /**
+     * Hreflang callback
+     */
+    public function hreflang_callback() {
+        $options = get_option('seokar_wpml_settings');
+        $value = isset($options['hreflang']) ? $options['hreflang'] : '1';
+        ?>
+        <label>
+            <input type="checkbox" name="seokar_wpml_settings[hreflang]" value="1" <?php checked('1', $value); ?>>
+            <?php _e('Add hreflang tags for translated content', 'seokar'); ?>
+        </label>
+        <?php
+    }
+
+    /**
+     * Translation meta callback
+     */
+    public function translation_meta_callback() {
+        $options = get_option('seokar_wpml_settings');
+        $value = isset($options['translation_meta']) ? $options['translation_meta'] : '1';
+        ?>
+        <label>
+            <input type="checkbox" name="seokar_wpml_settings[translation_meta]" value="1" <?php checked('1', $value); ?>>
+            <?php _e('Enable translation for SEO meta fields', 'seokar'); ?>
+        </label>
+        <?php
+    }
+
+    /**
+     * Filter meta box post types
+     */
+    public function filter_meta_box_post_types($post_types) {
+        foreach ($post_types as $key => $post_type) {
+            if (!apply_filters('wpml_is_translated_post_type', false, $post_type)) {
+                unset($post_types[$key]);
+            }
+        }
+        
+        return $post_types;
+    }
+}
