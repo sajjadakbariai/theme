@@ -3,9 +3,8 @@
  * Footer template for SeoKar Theme
  * 
  * @package SeoKar
- * @version 2.0.0
+ * @version 2.1.0
  */
-
 ?>
         </main><!-- #main -->
     </div><!-- #content -->
@@ -15,27 +14,19 @@
             <div class="container">
                 <div class="footer-widgets">
                     <?php if (is_active_sidebar('footer-1')) : ?>
-                        <div class="footer-widget-area">
-                            <?php dynamic_sidebar('footer-1'); ?>
-                        </div>
+                        <div class="footer-widget-area"><?php dynamic_sidebar('footer-1'); ?></div>
                     <?php endif; ?>
 
                     <?php if (is_active_sidebar('footer-2')) : ?>
-                        <div class="footer-widget-area">
-                            <?php dynamic_sidebar('footer-2'); ?>
-                        </div>
+                        <div class="footer-widget-area"><?php dynamic_sidebar('footer-2'); ?></div>
                     <?php endif; ?>
 
                     <?php if (is_active_sidebar('footer-3')) : ?>
-                        <div class="footer-widget-area">
-                            <?php dynamic_sidebar('footer-3'); ?>
-                        </div>
+                        <div class="footer-widget-area"><?php dynamic_sidebar('footer-3'); ?></div>
                     <?php endif; ?>
 
                     <?php if (is_active_sidebar('footer-4')) : ?>
-                        <div class="footer-widget-area">
-                            <?php dynamic_sidebar('footer-4'); ?>
-                        </div>
+                        <div class="footer-widget-area"><?php dynamic_sidebar('footer-4'); ?></div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -45,8 +36,7 @@
             <div class="container">
                 <div class="site-info">
                     <div class="copyright">
-                        &copy; <?php echo date('Y'); ?> <a href="<?php echo esc_url(home_url('/')); ?>"><?php bloginfo('name'); ?></a>.
-                        <?php esc_html_e('All rights reserved.', 'seokar'); ?>
+                        &copy; <?php echo date('Y'); ?> <a href="<?php echo esc_url(home_url('/')); ?>"><?php bloginfo('name'); ?></a>. <?php esc_html_e('All rights reserved.', 'seokar'); ?>
                     </div>
 
                     <div class="footer-links">
@@ -100,7 +90,12 @@
         </div>
     </footer><!-- #colophon -->
 
-    <?php // Back to top button ?>
+    <!-- Footer Loader -->
+    <div id="footer-loader" class="footer-loader" aria-hidden="true">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Back to top button -->
     <a href="#page" class="back-to-top" aria-label="<?php esc_attr_e('Back to top', 'seokar'); ?>" hidden>
         <span class="screen-reader-text"><?php esc_html_e('Back to top', 'seokar'); ?></span>
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -108,10 +103,10 @@
         </svg>
     </a>
 
-    <?php // Mobile menu overlay ?>
+    <!-- Mobile menu overlay -->
     <div class="mobile-menu-overlay" aria-hidden="true"></div>
 
-    <?php // Theme modals ?>
+    <!-- Search Modal -->
     <div id="search-modal" class="modal" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e('Search Modal', 'seokar'); ?>" hidden>
         <div class="modal-content">
             <button class="modal-close" aria-label="<?php esc_attr_e('Close modal', 'seokar'); ?>">
