@@ -1,0 +1,301 @@
+/* استایل‌های پیشرفته پیشنهاد محتوای هوشمند - سطح نابغه */
+:root {
+  --ai-rp-primary: #4361ee;
+  --ai-rp-secondary: #3a0ca3;
+  --ai-rp-accent: #f72585;
+  --ai-rp-light: #f8f9fa;
+  --ai-rp-dark: #212529;
+  --ai-rp-gradient: linear-gradient(135deg, #4361ee 0%, #3a0ca3 50%, #7209b7 100%);
+  --ai-rp-glass: rgba(255, 255, 255, 0.15);
+  --ai-rp-shadow-lg: 0 10px 30px -10px rgba(0, 0, 0, 0.2);
+  --ai-rp-shadow-xl: 0 20px 50px -10px rgba(0, 0, 0, 0.3);
+  --ai-rp-transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ai-related-posts {
+  --ai-rp-spacing: 2rem;
+  --ai-rp-bg: var(--ai-rp-light);
+  --ai-rp-border: none;
+  --ai-rp-radius: 16px;
+  --ai-rp-title-color: var(--ai-rp-dark);
+  --ai-rp-item-bg: white;
+  --ai-rp-thumb-height: 220px;
+  --ai-rp-gap: 2rem;
+  --ai-rp-columns: 3;
+  
+  margin: 3rem 0;
+  padding: var(--ai-rp-spacing);
+  background: var(--ai-rp-bg);
+  border-radius: var(--ai-rp-radius);
+  border: var(--ai-rp-border);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.ai-related-posts::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: var(--ai-rp-gradient);
+  z-index: 1;
+}
+
+.ai-related-posts__title {
+  --text-gradient: linear-gradient(90deg, var(--ai-rp-primary), var(--ai-rp-accent));
+  
+  margin-bottom: var(--ai-rp-spacing);
+  text-align: center;
+  color: transparent;
+  background: var(--text-gradient);
+  background-clip: text;
+  -webkit-background-clip: text;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  position: relative;
+  display: inline-block;
+  padding: 0 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.ai-related-posts__title::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--text-gradient);
+  border-radius: 2px;
+}
+
+.ai-related-posts__container {
+  display: grid;
+  grid-template-columns: repeat(var(--ai-rp-columns), minmax(0, 1fr));
+  gap: var(--ai-rp-gap);
+}
+
+.ai-related-posts__item {
+  --item-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  
+  position: relative;
+  background: var(--ai-rp-item-bg);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--item-shadow);
+  transition: var(--ai-rp-transition);
+  transform: translateY(0);
+  z-index: 1;
+}
+
+.ai-related-posts__item::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--ai-rp-gradient);
+  opacity: 0;
+  transition: var(--ai-rp-transition);
+  z-index: -1;
+}
+
+.ai-related-posts__item:hover {
+  transform: translateY(-10px);
+  box-shadow: var(--ai-rp-shadow-xl);
+}
+
+.ai-related-posts__item:hover::before {
+  opacity: 0.1;
+}
+
+.ai-related-posts__link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  text-decoration: none;
+  color: var(--ai-rp-dark);
+}
+
+.ai-related-posts__thumbnail-wrapper {
+  height: var(--ai-rp-thumb-height);
+  overflow: hidden;
+  position: relative;
+  border-radius: 8px 8px 0 0;
+}
+
+.ai-related-posts__thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: var(--ai-rp-transition);
+  transform-origin: center;
+}
+
+.ai-related-posts__item:hover .ai-related-posts__thumbnail {
+  transform: scale(1.1);
+}
+
+.ai-related-posts__content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.ai-related-posts__item-title {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.4;
+  transition: var(--ai-rp-transition);
+}
+
+.ai-related-posts__item:hover .ai-related-posts__item-title {
+  color: var(--ai-rp-primary);
+}
+
+.ai-related-posts__meta {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.ai-related-posts__date {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.ai-related-posts__date::before {
+  content: '📅';
+}
+
+.ai-related-posts__empty {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.1rem;
+  color: #6c757d;
+  position: relative;
+}
+
+/* افکت‌های ویژه برای اسلایدر */
+.ai-related-posts--slider .ai-related-posts__container {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 1rem;
+}
+
+.ai-related-posts--slider .ai-related-posts__container::-webkit-scrollbar {
+  display: none;
+}
+
+.ai-related-posts--slider .ai-related-posts__item {
+  scroll-snap-align: start;
+  min-width: calc(33.333% - (var(--ai-rp-gap) * 2 / 3));
+  margin-right: var(--ai-rp-gap);
+  flex-shrink: 0;
+}
+
+/* انیمیشن‌های پیشرفته */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ai-related-posts__item {
+  animation: fadeIn 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+.ai-related-posts__item:nth-child(1) { animation-delay: 0.1s; }
+.ai-related-posts__item:nth-child(2) { animation-delay: 0.2s; }
+.ai-related-posts__item:nth-child(3) { animation-delay: 0.3s; }
+.ai-related-posts__item:nth-child(4) { animation-delay: 0.4s; }
+
+/* حالت ریسپانسیو پیشرفته */
+@media (max-width: 1200px) {
+  .ai-related-posts {
+    --ai-rp-columns: 2;
+    --ai-rp-thumb-height: 200px;
+  }
+  
+  .ai-related-posts--slider .ai-related-posts__item {
+    min-width: calc(50% - (var(--ai-rp-gap) / 2));
+  }
+}
+
+@media (max-width: 768px) {
+  .ai-related-posts {
+    --ai-rp-spacing: 1.5rem;
+    --ai-rp-gap: 1.5rem;
+    border-radius: 0;
+    margin: 2rem -1rem;
+  }
+  
+  .ai-related-posts__title {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .ai-related-posts {
+    --ai-rp-columns: 1;
+    --ai-rp-thumb-height: 240px;
+  }
+  
+  .ai-related-posts--slider .ai-related-posts__item {
+    min-width: calc(85% - var(--ai-rp-gap));
+  }
+  
+  .ai-related-posts__title {
+    font-size: 1.5rem;
+  }
+}
+
+/* افکت‌های پس زمینه پویا */
+.ai-related-posts::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 10% 20%, rgba(67, 97, 238, 0.05) 0%, transparent 20%),
+    radial-gradient(circle at 90% 80%, rgba(247, 37, 133, 0.05) 0%, transparent 20%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* افکت hover پیشرفته برای لینک‌ها */
+.ai-related-posts__link {
+  position: relative;
+}
+
+.ai-related-posts__link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--ai-rp-accent);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s ease;
+}
+
+.ai-related-posts__item:hover .ai-related-posts__link::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
