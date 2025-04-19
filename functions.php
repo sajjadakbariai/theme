@@ -53,3 +53,10 @@ function seokar_enqueue_page_styles() {
     }
 }
 add_action('wp_enqueue_scripts', 'seokar_enqueue_page_styles');
+// Load 404 page specific styles
+function seokar_404_styles() {
+    if (is_404()) {
+        wp_enqueue_style('seokar-404-style', get_template_directory_uri() . '/assets/css/error-404-style.css', array(), '1.0.0');
+    }
+}
+add_action('wp_enqueue_scripts', 'seokar_404_styles');
