@@ -1,4 +1,11 @@
 <?php
+/**
+ * فایل functions.php قالب SEOKar
+ * 
+ * @package SEOKar
+ * @version 1.0.0
+ */
+
 // جلوگیری از دسترسی مستقیم به فایل
 if (!defined('ABSPATH')) {
     exit;
@@ -8,10 +15,12 @@ if (!defined('ABSPATH')) {
 define('SEOKAR_VERSION', '1.0.0');
 define('SEOKAR_DIR', get_template_directory());
 define('SEOKAR_URI', get_template_directory_uri());
+define('SEOKAR_INC_DIR', SEOKAR_DIR . '/inc/');
+define('SEOKAR_DEV_MODE', true); // حالت توسعه
 
 // بارگذاری ترجمه‌ها
 function seokar_load_textdomain() {
-    load_theme_textdomain('seokar', get_template_directory() . '/languages');
+    load_theme_textdomain('seokar', SEOKAR_DIR . '/languages');
 }
 add_action('after_setup_theme', 'seokar_load_textdomain');
 
@@ -21,56 +30,76 @@ add_filter('use_block_editor_for_post', '__return_false');
 // فعال‌سازی قابلیت آپدیت خودکار قالب (در صورت نیاز)
 add_filter('auto_update_theme', '__return_true');
 
-// در فایل functions.php
-require_once get_template_directory() . '/inc/theme-options.php';
+/**
+ * بارگذاری فایل‌های مورد نیاز
+ */
+function seokar_load_required_files() {
+    // لیست فایل‌هایی که باید بارگذاری شوند
+    $files = array(
+        'theme-options',      // تنظیمات تم
+        'enqueue-scripts',    // استایل و اسکریپت‌ها
+        'ai-settings',        // تنظیمات هوش مصنوعی
+        'ai-assistant',       // اتصال به هوش مصنوعی
+        'custom-post-types',  // پست تایپ‌های سفارشی
+        'custom-taxonomies',  // تاکسونومی‌های سفارشی
+        'shortcodes',         // شورتکدها
+        'widgets',            // ویجت‌های سفارشی
+        'analytics'           // اتصال به سرویس‌های آنالیتیکس
+    );
 
-// حالت توسعه (Dev Mode) برای جلوگیری از کش استایل و اسکریپت
-define('SEOKAR_DEV_MODE', true);
+    foreach ($files as $file) {
+        $file_path = SEOKAR_INC_DIR . $file . '.php';
+        
+        if (file_exists($file_path)) {
+            require_once $file_path;
+        } elseif (WP_DEBUG) {
+            error_log(sprintf(
+                __('فایل %s در مسیر %s یافت نشد', 'seokar'),
+                $file . '.php',
+                $file_path
+            ));
+        }
+    }
+}
+seokar_load_required_files();
 
+/**
+ * مدیریت استایل‌های صفحه‌ای
+ */
 function seokar_enqueue_page_styles() {
     if (is_page()) {
-        $file = get_template_directory() . '/assets/css/page-style.css';
-        
-        if (SEOKAR_DEV_MODE) {
-            $version = time(); // همیشه نسخه جدید (کش نشه)
-        } else {
-            $version = file_exists($file) ? filemtime($file) : '1.0.0';
-        }
-        
-        wp_enqueue_style('seokar-page-style', get_template_directory_uri() . '/assets/css/page-style.css', array(), $version);
+        $file = SEOKAR_DIR . '/assets/css/page-style.css';
+        $version = SEOKAR_DEV_MODE ? time() : (file_exists($file) ? filemtime($file) : SEOKAR_VERSION;
+        wp_enqueue_style('seokar-page-style', SEOKAR_URI . '/assets/css/page-style.css', array(), $version);
+    }
+    
+    if (is_404()) {
+        wp_enqueue_style('seokar-404-style', SEOKAR_URI . '/assets/css/error-404-style.css', array(), SEOKAR_VERSION);
     }
 }
 add_action('wp_enqueue_scripts', 'seokar_enqueue_page_styles');
-// Load 404 page specific styles
-function seokar_404_styles() {
-    if (is_404()) {
-        wp_enqueue_style('seokar-404-style', get_template_directory_uri() . '/assets/css/error-404-style.css', array(), '1.0.0');
-    }
+
+/**
+ * فونت آویسام
+ */
+function seokar_enqueue_font_awesome() {
+    wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css', array(), '5.15.4');
 }
-add_action('wp_enqueue_scripts', 'seokar_404_styles');
+add_action('wp_enqueue_scripts', 'seokar_enqueue_font_awesome');
 
-
+/**
+ * هوش مصنوعی - نمایش مطالب مرتبط
+ */
 add_filter('the_content', function($content) {
     if (is_single() && in_the_loop() && is_main_query()) {
-        // این تابع به صورت خودکار CSS را هم اضافه می‌کند
         $content .= ai_display_related_posts(get_the_ID());
     }
     return $content;
 });
-<?php
+
 /**
- * فایل هوش 
+ * ویجت‌ها - محلی‌سازی اسکریپت‌ها
  */
-
-// بارگذاری تنظیمات هوش مصنوعی
-require_once get_template_directory() . '/inc/ai-settings.php';
-
-// استایل‌های اضافی برای ماژول‌ها
-add_action('wp_enqueue_scripts', 'ai_styles');
-function ai_styles() {
-    wp_enqueue_style('ai-styles', get_template_directory_uri() . '/ai-modules/ai.css');
-}
-// Register and localize widget JS
 function seokar_widgets_js_localization() {
     wp_enqueue_script('seokar-widgets');
     
@@ -84,7 +113,9 @@ function seokar_widgets_js_localization() {
 }
 add_action('wp_enqueue_scripts', 'seokar_widgets_js_localization');
 
-// AJAX handler for post views
+/**
+ * AJAX handler برای بازدید پست‌ها
+ */
 function seokar_update_post_views() {
     check_ajax_referer('seokar_widgets_nonce', 'security');
     
@@ -101,7 +132,9 @@ function seokar_update_post_views() {
 add_action('wp_ajax_seokar_update_post_views', 'seokar_update_post_views');
 add_action('wp_ajax_nopriv_seokar_update_post_views', 'seokar_update_post_views');
 
-// AJAX handler for newsletter subscription
+/**
+ * AJAX handler برای عضویت در خبرنامه
+ */
 function seokar_newsletter_subscribe() {
     check_ajax_referer('seokar_widgets_nonce', 'security');
     
@@ -110,18 +143,19 @@ function seokar_newsletter_subscribe() {
     }
     
     $email = sanitize_email($_POST['email']);
+    // اینجا می‌توانید منطق ذخیره‌سازی ایمیل را اضافه کنید
     
-    // Here you can add your subscription logic (save to database, send to email service, etc.)
-    // For example:
-    // $subscribed = save_newsletter_subscriber($email);
-    
-    // For demo purposes, we'll just return a success message
     wp_send_json_success(array(
-        'message' => __('Thank you');
-
-function seokar_enqueue_font_awesome() {
-    wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css', array(), '5.15.4');
+        'message' => __('Thank you for subscribing!', 'seokar')
+    ));
 }
-add_action('wp_enqueue_scripts', 'seokar_enqueue_font_awesome');
-require_once get_template_directory() . '/inc/enqueue-scripts.php';
-    
+add_action('wp_ajax_seokar_newsletter_subscribe', 'seokar_newsletter_subscribe');
+add_action('wp_ajax_nopriv_seokar_newsletter_subscribe', 'seokar_newsletter_subscribe');
+
+/**
+ * استایل‌های اضافی برای ماژول‌های هوش مصنوعی
+ */
+function ai_styles() {
+    wp_enqueue_style('ai-styles', SEOKAR_URI . '/ai-modules/ai.css', array(), SEOKAR_VERSION);
+}
+add_action('wp_enqueue_scripts', 'ai_styles');
