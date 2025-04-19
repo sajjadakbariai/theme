@@ -1,0 +1,41 @@
+/* استایل مخصوص صفحات (Page Template) */
+
+.entry-header .entry-title {
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    color: #333;
+    margin-bottom: 2rem;
+}
+
+.entry-content {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #555;
+}
+
+.entry-content p {
+    margin-bottom: 1.5rem;
+}
+
+.page-links {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.page-links a,
+.page-links span {
+    display: inline-block;
+    margin: 0 5px;
+    padding: 8px 15px;
+    background-color: #f0f0f0;
+    color: #333;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.page-links a:hover {
+    background-color: #007bff;
+    color: #fff;
+}
