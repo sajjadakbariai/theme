@@ -1,0 +1,47 @@
+/* استایل‌های مدیریت تاکسونومی‌های سفارشی */
+.seokar-taxonomy-meta {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.seokar-taxonomy-meta .form-field {
+    margin-bottom: 15px;
+}
+
+.seokar-taxonomy-meta label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.seokar-taxonomy-meta input[type="text"],
+.seokar-taxonomy-meta input[type="url"] {
+    width: 100%;
+    padding: 8px;
+}
+
+.seokar-taxonomy-meta .image-preview {
+    max-width: 150px;
+    height: auto;
+    margin-top: 10px;
+    display: block;
+}
+
+.seokar-taxonomy-meta .button-upload {
+    margin-top: 10px;
+}
+
+/* استایل‌های ستون‌های سفارشی در لیست تاکسونومی‌ها */
+.column-icon i {
+    font-size: 20px;
+    vertical-align: middle;
+}
+
+.column-image img {
+    max-width: 50px;
+    height: auto;
+    border-radius: 3px;
+}
