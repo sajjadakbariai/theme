@@ -45,8 +45,8 @@ function seokar_load_required_files() {
         'shortcodes',         // شورتکدها
         'widgets',            // ویجت‌های سفارشی
         'analytics'           // اتصال به سرویس‌های آنالیتیکس
-        'webp',            // ویجت‌های سفارشی
-        'analytics'           // اتصال به سرویس‌های آنالیتیکس
+        'webp',            // تبدیل فرمت تصویر
+        'optimization'           // بهینه سازی وردپرس
     );
 
     foreach ($files as $file) {
