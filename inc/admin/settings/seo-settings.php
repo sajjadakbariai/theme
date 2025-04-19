@@ -31,10 +31,14 @@ class Theme_SEO_Pro {
 
         // Core SEO hooks
         add_action('after_setup_theme', array($this, 'setup_seo_features'));
+        add_action('wp_head', [$this, 'optimize_web_vitals'], 0);
         add_action('customize_register', array($this, 'register_seo_customizer_settings'));
         add_action('wp_head', array($this, 'output_seo_meta_tags'), 1);
         add_action('wp_footer', array($this, 'output_schema_markup'));
-        
+        add_filter('the_content', [$this, 'add_faq_schema']);
+        add_action('wp_head', [$this, 'handle_duplicate_content'], 2);
+        add_filter('the_content', [$this, 'optimize_for_snippets']);
+        add_action('wp_loaded', [$this, 'scan_broken_links']);
         // Title and meta modifications
         add_filter('pre_get_document_title', array($this, 'generate_document_title'), 20);
         add_filter('wpseo_title', array($this, 'generate_document_title'));
@@ -43,11 +47,12 @@ class Theme_SEO_Pro {
         // Content optimizations
         add_filter('the_content', array($this, 'optimize_content_markup'));
         add_filter('post_thumbnail_html', array($this, 'optimize_image_markup'), 10, 5);
-        
+        add_filter('wp_get_attachment_image_src', array($this, 'convert_to_webp'), 10, 4);
         // Admin interface
         add_action('admin_init', array($this, 'register_seo_settings_page'));
         add_action('add_meta_boxes', array($this, 'add_seo_meta_boxes'));
         add_action('save_post', array($this, 'save_seo_meta_data'));
+        add_action('admin_init', [$this, 'setup_rank_tracking_cron']);
         
         // Performance optimizations
         add_action('template_redirect', array($this, 'redirect_attachment_pages'));
@@ -56,6 +61,9 @@ class Theme_SEO_Pro {
         // XML Sitemap functionality
         add_action('init', array($this, 'register_xml_sitemap'));
         add_filter('robots_txt', array($this, 'modify_robots_txt'), 10, 2);
+        add_action('wp_dashboard_setup', array($this, 'add_seo_dashboard_widget'));   
+        add_action('admin_menu', array($this, 'add_crawl_errors_page'));
+        add_action('send_headers', [$this, 'add_http_security_headers']);
     }
 
     /**
@@ -100,6 +108,55 @@ class Theme_SEO_Pro {
             'capability' => 'manage_options',
         ));
 
+        $wp_customize->add_section('technical_seo_section', [
+            'title' => __('Technical SEO', 'seokar'),
+            'panel' => 'theme_seo_pro_panel',
+        ]);
+
+        $wp_customize->add_setting('enable_voice_search', [
+            'default' => false,
+            'sanitize_callback' => 'wp_validate_boolean',
+        ]);
+        
+        $wp_customize->add_control('enable_voice_search', [
+            'label' => __('Voice Search Optimization', 'seokar'),
+            'section' => 'schema_section',
+            'type' => 'checkbox',
+            'description' => __('Adds FAQ schema for voice assistants', 'seokar'),
+        ]);
+
+        $wp_customize->add_setting('handle_duplicate_content', [
+            'default' => 'canonical',
+            'sanitize_callback' => 'sanitize_text_field',
+        ]);
+        
+        $wp_customize->add_control('handle_duplicate_content', [
+            'label' => __('Duplicate Content Handling', 'seokar'),
+            'section' => 'indexing_section',
+            'type' => 'select',
+            'choices' => [
+                'canonical' => __('Automatic Canonical', 'seokar'),
+                'noindex' => __('Noindex Pagination', 'seokar'),
+                'redirect' => __('Redirect to Primary', 'seokar'),
+            ],
+        ]);
+
+        $wp_customize->add_section('rich_snippets_section', [
+            'title' => __('Rich Snippets', 'seokar'),
+            'panel' => 'theme_seo_pro_panel',
+        ]);
+        
+        $wp_customize->add_setting('enable_featured_snippets', [
+            'default' => true,
+            'sanitize_callback' => 'wp_validate_boolean',
+        ]);
+        
+        $wp_customize->add_control('enable_featured_snippets', [
+            'label' => __('Optimize for Featured Snippets', 'seokar'),
+            'section' => 'rich_snippets_section',
+            'type' => 'checkbox',
+        ]);
+
         // General SEO Settings Section
         $this->add_general_seo_section($wp_customize);
         
@@ -125,6 +182,143 @@ class Theme_SEO_Pro {
         $this->add_advanced_section($wp_customize);
     }
     
+    public function optimize_for_snippets($content) {
+        if (!get_theme_mod('enable_featured_snippets', true)) return $content;
+    
+        // ساختار داده‌های HowTo
+        if (preg_match('/<ol>(.*?)<\/ol>/is', $content, $matches)) {
+            $steps = [];
+            preg_match_all('/<li>(.*?)<\/li>/is', $matches[1], $list_items);
+            
+            foreach ($list_items[1] as $step) {
+                $steps[] = [
+                    '@type' => 'HowToStep',
+                    'text' => wp_strip_all_tags($step),
+                ];
+            }
+    
+            $this->schema_markup[] = [
+                '@context' => 'https://schema.org',
+                '@type' => 'HowTo',
+                'name' => get_the_title(),
+                'step' => $steps,
+            ];
+        }
+    
+        return $content;
+    }
+
+    public function add_faq_schema($content) {
+        if (!get_theme_mod('enable_voice_search', false)) return $content;
+    
+        preg_match_all('/<h3>(.*?)<\/h3>\s*<p>(.*?)<\/p>/is', $content, $matches);
+        if (empty($matches[0])) return $content;
+    
+        $faq_items = [];
+        foreach ($matches[1] as $i => $question) {
+            $faq_items[] = [
+                '@type' => 'Question',
+                'name' => wp_strip_all_tags($question),
+                'acceptedAnswer' => [
+                    '@type' => 'Answer',
+                    'text' => wp_strip_all_tags($matches[2][$i]),
+                ],
+            ];
+        }
+    
+        $schema = [
+            '@context' => 'https://schema.org',
+            '@type' => 'FAQPage',
+            'mainEntity' => $faq_items,
+        ];
+    
+        $this->schema_markup[] = $schema;
+        return $content;
+    }
+
+    public function optimize_web_vitals() {
+        if (!get_theme_mod('optimize_core_web_vitals', true)) return;
+    
+        // Preload critical resources
+        echo '<link rel="preload" href="' . get_template_directory_uri() . '/assets/css/critical.css" as="style">';
+        
+        // CLS prevention
+        echo '<style>
+            img { aspect-ratio: attr(width) / attr(height); }
+            .lazy-loaded { opacity: 0; transition: opacity 300ms; }
+        </style>';
+        
+        // LCP optimization
+        if (is_singular() && has_post_thumbnail()) {
+            $image = wp_get_attachment_image_src(get_post_thumbnail_id(), 'full');
+            echo '<link rel="preload" href="' . $image[0] . '" as="image" fetchpriority="high">';
+        }
+    }
+
+    public function handle_duplicate_content() {
+        $method = get_theme_mod('handle_duplicate_content', 'canonical');
+        
+        if (is_paged() && $method === 'noindex') {
+            echo '<meta name="robots" content="noindex,follow">';
+        } elseif (is_archive() && $method === 'redirect') {
+            wp_redirect(home_url(), 301);
+            exit;
+        }
+    }
+    
+    private function output_hreflang_tags() {
+        if (!function_exists('pll_the_languages') && !defined('ICL_LANGUAGE_CODE')) return;
+    
+        $languages = [];
+        
+        if (function_exists('pll_the_languages')) {
+            $languages = pll_the_languages(['raw' => 1]);
+        } elseif (defined('ICL_LANGUAGE_CODE')) {
+            $languages = icl_get_languages('skip_missing=0');
+        }
+    
+        foreach ($languages as $lang) {
+            echo '<link rel="alternate" hreflang="' . esc_attr($lang['language_code']) . '" href="' . esc_url($lang['url']) . '" />' . "\n";
+        }
+    }
+
+    public function scan_broken_links() {
+        if (!get_theme_mod('enable_broken_link_checker', false)) return;
+    
+        $links = $this->extract_all_links();
+        $broken = [];
+    
+        foreach ($links as $link) {
+            $response = wp_remote_head($link);
+            $code = wp_remote_retrieve_response_code($response);
+            
+            if ($code >= 400) {
+                $broken[] = [
+                    'url' => $link,
+                    'status' => $code,
+                    'source' => get_permalink(),
+                ];
+            }
+        }
+    
+        update_option('theme_seo_broken_links', $broken);
+    }
+    
+    private function extract_all_links() {
+        global $wpdb;
+        $posts = $wpdb->get_results("SELECT ID, post_content FROM $wpdb->posts WHERE post_status = 'publish'");
+        $links = [];
+    
+        foreach ($posts as $post) {
+            preg_match_all('/<a\s[^>]*href=(["\'])(?<href>.*?)\1/is', $post->post_content, $matches);
+            if ($matches['href']) {
+                $links = array_merge($links, $matches['href']);
+            }
+        }
+    
+        return array_unique($links);
+    }
+
     private function add_general_seo_section($wp_customize) {
         $wp_customize->add_section('general_seo_section', array(
             'title' => __('General SEO', 'seokar'),
@@ -263,6 +457,22 @@ class Theme_SEO_Pro {
             'title' => __('Indexing Control', 'seokar'),
             'panel' => 'theme_seo_pro_panel',
         ));
+
+        $wp_customize->add_setting('handle_duplicate_content', [
+            'default' => 'canonical',
+            'sanitize_callback' => 'sanitize_text_field',
+        ]);
+        
+        $wp_customize->add_control('handle_duplicate_content', [
+            'label' => __('Duplicate Content Handling', 'seokar'),
+            'section' => 'indexing_section',
+            'type' => 'select',
+            'choices' => [
+                'canonical' => __('Automatic Canonical', 'seokar'),
+                'noindex' => __('Noindex Pagination', 'seokar'),
+                'redirect' => __('Redirect to Primary', 'seokar'),
+            ],
+        ]);
 
         // Noindex Search Pages
         $wp_customize->add_setting('noindex_search_pages', array(
@@ -564,6 +774,17 @@ class Theme_SEO_Pro {
             'panel' => 'theme_seo_pro_panel',
         ));
 
+        $wp_customize->add_setting('enable_speed_test', array(
+            'default' => true,
+            'sanitize_callback' => 'wp_validate_boolean',
+        ));
+
+        $wp_customize->add_control('enable_speed_test', array(
+            'label' => __('Enable Page Speed Test', 'seokar'),
+            'section' => 'performance_section',
+            'type' => 'checkbox',
+            'description' => __('Adds page speed testing tools in admin bar', 'seokar'),
+        ));
         // Lazy Loading
         $wp_customize->add_setting('enable_lazy_loading', array(
             'default' => true,
@@ -614,8 +835,19 @@ class Theme_SEO_Pro {
             'type' => 'text',
             'description' => __('Comma separated list of domains (e.g., fonts.googleapis.com,fonts.gstatic.com)', 'seokar'),
         ));
+        $wp_customize->add_setting('enable_amp_support', array(
+            'default' => false,
+            'sanitize_callback' => 'wp_validate_boolean',
+        ));
+
+        $wp_customize->add_control('enable_amp_support', array(
+            'label' => __('Enable AMP Support', 'seokar'),
+            'section' => 'performance_section',
+            'type' => 'checkbox',
+            'description' => __('Generates AMP versions of your pages', 'seokar'),
+        ));
     }
-    
+
     private function add_advanced_section($wp_customize) {
         $wp_customize->add_section('advanced_section', array(
             'title' => __('Advanced', 'seokar'),
@@ -672,6 +904,17 @@ class Theme_SEO_Pro {
             'description' => __('Reduces HTTP requests and improves performance', 'seokar'),
         ));
 
+        $wp_customize->add_setting('enable_http_headers', [
+            'default' => true,
+            'sanitize_callback' => 'wp_validate_boolean',
+        ]);
+        
+        $wp_customize->add_control('enable_http_headers', [
+            'label' => __('Enable Security Headers', 'seokar'),
+            'section' => 'technical_seo_section',
+            'type' => 'checkbox',
+        ]);
+
         // Disable Embeds
         $wp_customize->add_setting('disable_embeds', array(
             'default' => true,
@@ -684,11 +927,34 @@ class Theme_SEO_Pro {
             'type' => 'checkbox',
             'description' => __('Reduces HTTP requests and improves security', 'seokar'),
         ));
+
+        $wp_customize->add_setting('crawl_budget_optimization', [
+            'default' => true,
+            'sanitize_callback' => 'wp_validate_boolean',
+        ]);
+        
+        $wp_customize->add_control('crawl_budget_optimization', [
+            'label' => __('Optimize Crawl Budget', 'seokar'),
+            'section' => 'technical_seo_section',
+            'type' => 'checkbox',
+            'description' => __('Improves search engine crawling efficiency', 'seokar'),
+        ]);
+    }
+
+
+    public function add_http_security_headers() {
+        if (!get_theme_mod('enable_http_headers', true)) return;
+    
+        header('X-Content-Type-Options: nosniff');
+        header('X-Frame-Options: SAMEORIGIN');
+        header('X-XSS-Protection: 1; mode=block');
+        header('Referrer-Policy: strict-origin-when-cross-origin');
     }
 
     /**
      * Output SEO meta tags in head
      */
+
     public function output_seo_meta_tags() {
         // Basic meta tags
         $this->output_basic_meta_tags();
@@ -741,6 +1007,56 @@ class Theme_SEO_Pro {
         echo '<link rel="pingback" href="' . esc_url(get_bloginfo('pingback_url')) . '">' . "\n";
     }
     
+    public function add_seo_dashboard_widget() {
+        wp_add_dashboard_widget(
+            'theme_seo_health_widget',
+            __('SEO Health Check', 'seokar'),
+            array($this, 'render_seo_health_widget')
+        );
+    }
+    
+    public function render_seo_health_widget() {
+        $checks = array(
+            'title' => array(
+                'label' => __('Page Titles', 'seokar'),
+                'check' => $this->check_titles(),
+            ),
+            'description' => array(
+                'label' => __('Meta Descriptions', 'seokar'),
+                'check' => $this->check_descriptions(),
+            ),
+            'images' => array(
+                'label' => __('Image Alt Texts', 'seokar'),
+                'check' => $this->check_image_alts(),
+            ),
+            'links' => array(
+                'label' => __('Internal Linking', 'seokar'),
+                'check' => $this->check_internal_links(),
+            ),
+        );
+    
+        echo '<div class="theme-seo-health-check">';
+        foreach ($checks as $check) {
+            echo '<div class="theme-seo-check-item ' . ($check['check']['status'] ? 'success' : 'warning') . '">';
+            echo '<h3>' . $check['label'] . ': ' . ($check['check']['status'] ? '✓' : '⚠') . '</h3>';
+            echo '<p>' . $check['check']['message'] . '</p>';
+            echo '</div>';
+        }
+        echo '</div>';
+    }
+    
+    private function check_titles() {
+        global $post;
+        $title = get_post_meta($post->ID, '_seo_title', true);
+        
+        return array(
+            'status' => !empty($title),
+            'message' => empty($title) ? 
+                __('No custom title set. Using default format.', 'seokar') : 
+                __('Custom title is set.', 'seokar'),
+        );
+    }
+
     private function output_opengraph_tags() {
         global $post;
         
@@ -1281,6 +1597,25 @@ class Theme_SEO_Pro {
         return $profiles;
     }
     
+    add_action('init', 'theme_seo_amp_init');
+function theme_seo_amp_init() {
+    if (!get_theme_mod('enable_amp_support', false)) {
+        return;
+    }
+
+    add_rewrite_endpoint('amp', EP_PERMALINK);
+    add_action('template_redirect', 'theme_seo_amp_template');
+}
+
+function theme_seo_amp_template() {
+    if (!is_singular() || !get_query_var('amp')) {
+        return;
+    }
+
+    // Load AMP template
+    locate_template('amp-template.php', true);
+    exit;
+}
     /**
      * Register SEO settings page in admin
      */
@@ -1305,6 +1640,13 @@ class Theme_SEO_Pro {
             array($this, 'render_general_settings_section'),
             'theme-seo-settings'
         );
+        add_settings_section(
+            'rank_tracking',
+            __('Rank Tracking', 'seokar'),
+            [$this, 'render_rank_tracking_section'],
+            'theme-seo-settings'
+        );
+        
         
         // Add fields
         add_settings_field(
@@ -1314,8 +1656,14 @@ class Theme_SEO_Pro {
             'theme-seo-settings',
             'general_settings'
         );
-        
-        // Add more fields as needed...
+
+        add_settings_field(
+            'rank_tracking_keywords',
+            __('Target Keywords', 'seokar'),
+            [$this, 'render_keywords_field'],
+            'theme-seo-settings',
+            'rank_tracking'
+        );
     }
     
     public function render_seo_settings_page() {
@@ -1335,6 +1683,18 @@ class Theme_SEO_Pro {
             </form>
         </div>
         <?php
+    }
+
+    public function render_rank_tracking_section() {
+        echo '<p>' . __('Track your keyword rankings over time', 'seokar') . '</p>';
+    }
+    
+    public function render_keywords_field() {
+        $keywords = get_option('theme_seo_target_keywords', []);
+        echo '<textarea id="rank_tracking_keywords" name="theme_seo_target_keywords" rows="5" class="large-text">';
+        echo esc_textarea(implode("\n", $keywords));
+        echo '</textarea>';
+        echo '<p class="description">' . __('One keyword per line', 'seokar') . '</p>';
     }
     
     public function render_general_settings_section() {
@@ -1361,6 +1721,70 @@ class Theme_SEO_Pro {
         // Add validation for other fields...
         
         return $output;
+    }
+    
+    public function add_crawl_errors_page() {
+        add_submenu_page(
+            'theme-seo-settings',
+            __('Crawl Errors', 'seokar'),
+            __('Crawl Errors', 'seokar'),
+            'manage_options',
+            'theme-seo-crawl-errors',
+            array($this, 'render_crawl_errors_page')
+        );
+    }
+    
+    public function render_crawl_errors_page() {
+        $errors = get_option('theme_seo_crawl_errors', array());
+        ?>
+        <div class="wrap">
+            <h1><?php _e('Crawl Errors', 'seokar'); ?></h1>
+            <table class="wp-list-table widefat striped">
+                <thead>
+                    <tr>
+                        <th><?php _e('URL', 'seokar'); ?></th>
+                        <th><?php _e('Error', 'seokar'); ?></th>
+                        <th><?php _e('First Detected', 'seokar'); ?></th>
+                        <th><?php _e('Actions', 'seokar'); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($errors as $error): ?>
+                    <tr>
+                        <td><?php echo esc_url($error['url']); ?></td>
+                        <td><?php echo esc_html($error['error']); ?></td>
+                        <td><?php echo date_i18n(get_option('date_format'), $error['time']); ?></td>
+                        <td>
+                            <a href="<?php echo admin_url('admin.php?page=theme-seo-settings&action=ignore_error&url=' . urlencode($error['url'])); ?>">
+                                <?php _e('Ignore', 'seokar'); ?>
+                            </a>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <?php
+    }
+
+    public function setup_rank_tracking_cron() {
+        if (!wp_next_scheduled('theme_seo_track_rankings')) {
+            wp_schedule_event(time(), 'weekly', 'theme_seo_track_rankings');
+        }
+        
+        add_action('theme_seo_track_rankings', [$this, 'track_keyword_rankings']);
+    }
+    
+    public function track_keyword_rankings() {
+        $keywords = get_option('theme_seo_target_keywords', []);
+        $rankings = get_option('theme_seo_rankings', []);
+    
+        foreach ($keywords as $keyword) {
+            $rank = $this->fetch_google_rank($keyword);
+            $rankings[$keyword][time()] = $rank;
+        }
+    
+        update_option('theme_seo_rankings', $rankings);
     }
     
     /**
@@ -2181,4 +2605,37 @@ function theme_seo_admin_bar_menu($wp_admin_bar) {
         ));
     }
 }
-add_action('admin_bar_menu', 'theme_seo_admin_bar_menu', 100);
+
+add_action('admin_bar_menu', 'theme_seo_speed_test_tool', 110);
+function theme_seo_speed_test_tool($wp_admin_bar) {
+    if (!current_user_can('manage_options') || !get_theme_mod('enable_speed_test', true)) {
+        return;
+    }
+
+    $current_url = (is_ssl() ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    $speed_url = 'https://developers.google.com/speed/pagespeed/insights/?url=' . urlencode($current_url);
+    $gtmetrix_url = 'https://gtmetrix.com/?url=' . urlencode($current_url);
+
+    $wp_admin_bar->add_node(array(
+        'id'    => 'theme-seo-speed',
+        'title' => __('Test Page Speed', 'seokar'),
+        'href'  => '#',
+        'meta'  => array('class' => 'theme-seo-speed-test'),
+    ));
+
+    $wp_admin_bar->add_node(array(
+        'id'     => 'theme-seo-pagespeed',
+        'parent' => 'theme-seo-speed',
+        'title'  => __('Google PageSpeed', 'seokar'),
+        'href'   => $speed_url,
+        'meta'  => array('target' => '_blank'),
+    ));
+
+    $wp_admin_bar->add_node(array(
+        'id'     => 'theme-seo-gtmetrix',
+        'parent' => 'theme-seo-speed',
+        'title'  => __('GTmetrix', 'seokar'),
+        'href'   => $gtmetrix_url,
+        'meta'  => array('target' => '_blank'),
+    ));
+}
