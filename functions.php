@@ -44,9 +44,9 @@ function seokar_load_required_files() {
         'custom-taxonomies',  // تاکسونومی‌های سفارشی
         'shortcodes',         // شورتکدها
         'widgets',            // ویجت‌های سفارشی
-        'analytics'           // اتصال به سرویس‌های آنالیتیکس
-        'webp',            // تبدیل فرمت تصویر
-        'optimization'           // بهینه سازی وردپرس
+        'analytics',          // اتصال به سرویس‌های آنالیتیکس
+        'webp',              // تبدیل فرمت تصویر
+        'optimization'        // بهینه سازی وردپرس
     );
 
     foreach ($files as $file) {
@@ -71,7 +71,7 @@ seokar_load_required_files();
 function seokar_enqueue_page_styles() {
     if (is_page()) {
         $file = SEOKAR_DIR . '/assets/css/page-style.css';
-        $version = SEOKAR_DEV_MODE ? time() : (file_exists($file) ? filemtime($file) : SEOKAR_VERSION;
+        $version = SEOKAR_DEV_MODE ? time() : (file_exists($file) ? filemtime($file) : SEOKAR_VERSION);
         wp_enqueue_style('seokar-page-style', SEOKAR_URI . '/assets/css/page-style.css', array(), $version);
     }
     
