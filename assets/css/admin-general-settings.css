@@ -1,0 +1,381 @@
+/* Reset و پایه‌های اصلی */
+.seokar-settings-container {
+  --primary-color: #3a7bd5;
+  --secondary-color: #00d2ff;
+  --text-color: #1e1e1e;
+  --light-text: #757575;
+  --border-color: #ddd;
+  --success-color: #4caf50;
+  --warning-color: #ff9800;
+  --error-color: #f44336;
+  --bg-color: #f5f5f5;
+  --card-bg: #fff;
+  --input-bg: #fff;
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  --transition: all 0.3s ease;
+  
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+  line-height: 1.6;
+  color: var(--text-color);
+  background-color: var(--bg-color);
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 30px;
+}
+
+/* فرم تنظیمات */
+.seokar-settings-form {
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: var(--shadow);
+  
+  h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--primary-color);
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .form-table {
+    width: 100%;
+    border-collapse: collapse;
+    
+    th, td {
+      padding: 15px 10px;
+      vertical-align: top;
+      text-align: right;
+    }
+    
+    th {
+      width: 200px;
+      font-weight: 500;
+    }
+    
+    tr:not(:last-child) {
+      border-bottom: 1px solid var(--border-color);
+    }
+  }
+  
+  .regular-text {
+    width: 100%;
+    max-width: 500px;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--input-bg);
+    transition: var(--transition);
+    
+    &:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 1px var(--primary-color);
+      outline: none;
+    }
+  }
+  
+  .large-text {
+    width: 100%;
+    min-height: 120px;
+  }
+  
+  .description {
+    color: var(--light-text);
+    font-size: 0.85rem;
+    margin-top: 5px;
+  }
+}
+
+/* سایدبار */
+.seokar-settings-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.seokar-settings-card {
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+  
+  h3 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    color: var(--primary-color);
+  }
+  
+  p {
+    color: var(--light-text);
+    font-size: 0.9rem;
+  }
+}
+
+/* فیلدهای خاص */
+.seokar-media-uploader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  
+  .seokar-media-url {
+    flex: 1;
+    min-width: 200px;
+  }
+  
+  .seokar-media-preview {
+    flex: 0 0 100%;
+    
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+    }
+  }
+  
+  .seokar-media-remove {
+    display: none;
+    
+    &.visible {
+      display: inline-block;
+    }
+  }
+}
+
+/* سوئیچ */
+.seokar-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+  
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    
+    &:checked + .seokar-slider {
+      background-color: var(--primary-color);
+    }
+    
+    &:focus + .seokar-slider {
+      box-shadow: 0 0 1px var(--primary-color);
+    }
+    
+    &:checked + .seokar-slider:before {
+      transform: translateX(26px);
+    }
+  }
+  
+  .seokar-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: var(--transition);
+    border-radius: 24px;
+    
+    &:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: var(--transition);
+      border-radius: 50%;
+    }
+    
+    &.round {
+      border-radius: 24px;
+      
+      &:before {
+        border-radius: 50%;
+      }
+    }
+  }
+}
+
+/* ویرایشگر کد */
+.seokar-code-editor {
+  font-family: 'Courier New', Courier, monospace;
+  width: 100%;
+  min-height: 200px;
+  background-color: #f8f8f8;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 10px;
+}
+
+/* دکمه‌ها */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 14px;
+  line-height: 1;
+  transition: var(--transition);
+  
+  &:hover {
+    background-color: #2c6bc5;
+    color: white;
+  }
+  
+  &.button-secondary {
+    background-color: #f0f0f0;
+    color: var(--text-color);
+    
+    &:hover {
+      background-color: #e0e0e0;
+    }
+  }
+}
+
+.seokar-reset-section {
+  margin-top: 20px;
+  background-color: var(--warning-color);
+  color: white;
+  
+  &:hover {
+    background-color: #e68a00;
+  }
+}
+
+/* تاریخچه تغییرات */
+.seokar-change-log {
+  max-height: 400px;
+  overflow-y: auto;
+  
+  ul {
+    list-style: none;
+    
+    ul {
+      margin-right: 20px;
+      margin-top: 5px;
+      margin-bottom: 10px;
+      
+      li {
+        font-size: 0.85rem;
+        color: var(--light-text);
+        padding: 3px 0;
+        
+        code {
+          background-color: #f5f5f5;
+          padding: 2px 4px;
+          border-radius: 3px;
+          font-family: monospace;
+        }
+      }
+    }
+  }
+}
+
+/* واکنش‌گرایی */
+@media (max-width: 1024px) {
+  .seokar-settings-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .seokar-settings-sidebar {
+    grid-row: 1;
+  }
+}
+
+@media (max-width: 600px) {
+  .seokar-settings-form {
+    padding: 20px 15px;
+    
+    .form-table {
+      th, td {
+        display: block;
+        width: 100%;
+      }
+      
+      th {
+        padding-bottom: 5px;
+      }
+      
+      td {
+        padding-top: 5px;
+        padding-bottom: 20px;
+      }
+    }
+  }
+}
+
+/* انیمیشن‌ها */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.seokar-settings-card {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* حالت‌های مختلف */
+.notice {
+  padding: 15px;
+  margin-bottom: 20px;
+  border-left: 4px solid;
+  border-radius: 4px;
+  background-color: var(--card-bg);
+  box-shadow: var(--shadow);
+  animation: fadeIn 0.3s ease-out;
+  
+  &.notice-success {
+    border-left-color: var(--success-color);
+  }
+  
+  &.notice-error {
+    border-left-color: var(--error-color);
+  }
+  
+  p {
+    margin: 0;
+    color: var(--text-color);
+  }
+}
+
+/* بهبودهای خاص برای وردپرس */
+.wp-picker-container {
+  .wp-picker-input-wrap {
+    display: flex;
+    gap: 5px;
+    
+    .button {
+      margin-left: 0;
+    }
+  }
+}
+
+.CodeMirror {
+  border-radius: 4px;
+  height: auto !important;
+  border: 1px solid var(--border-color);
+  
+  .CodeMirror-scroll {
+    min-height: 200px;
+  }
+}
