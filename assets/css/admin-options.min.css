@@ -1,589 +1,421 @@
 /**
- * استایل‌های پیشرفته پنل مدیریت سئوکار - نسخه ریسپانسیو
- * 
- * @package    Seokar
- * @subpackage Admin
- * @author     Sajjad Akbari <sajjad.akbari.abc@gmail.com>
- * @license    GPL-3.0+
- * @version    3.2.0
- * @copyright  2025 تیم توسعه سئوکار
+ * Styles for SeoKar Theme Options Panel
+ *
+ * @package    SeoKar
+ * @subpackage Admin\Assets
+ * @author     Sajjad Akbari <info@sajjadakbari.com>
+ * @version    4.0.0
  */
 
-/* Reset و پایه‌ای */
-.seokar-settings-wrap * {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
-}
-
+/*--------------------------------------------------------------
+# General Layout & Wrapper
+--------------------------------------------------------------*/
 .seokar-settings-wrap {
-  --primary-color: #2271b1;
-  --primary-hover: #135e96;
-  --success-color: #00a32a;
-  --error-color: #d63638;
-  --warning-color: #dba617;
-  --text-color: #1d2327;
-  --text-light: #646970;
-  --border-color: #dcdcde;
-  --bg-color: #f6f7f7;
-  --bg-card: #fff;
-  --shadow: 0 1px 3px rgba(0,0,0,0.1);
-  --radius: 3px;
-  --transition: all 0.3s ease;
-  max-width: 1200px;
-  margin: 20px auto;
-  padding: 0;
-  color: var(--text-color);
-  line-height: 1.5;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    max-width: 1200px; /* یا عرض دلخواه دیگر */
+    /* background-color: #fff; */ /* اگر می‌خواهید پس‌زمینه مجزا داشته باشد */
+    /* border: 1px solid #c3c4c7; */ /* اگر می‌خواهید کادر داشته باشد */
+    /* box-shadow: 0 1px 1px rgba(0,0,0,.04); */
 }
 
-/* هدر پنل */
+/*--------------------------------------------------------------
+# Header
+--------------------------------------------------------------*/
 .seokar-settings-header {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
-  padding: 20px 0;
-  border-bottom: 1px solid var(--border-color);
-  margin-bottom: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #c3c4c7; /* var(--wp-admin-border-color-secondary) */
+    background-color: #f6f7f7; /* کمی متفاوت برای تمایز */
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    flex-wrap: wrap; /* برای ریسپانسیو */
+    gap: 10px; /* فاصله بین عنوان و ورژن در حالت شکستن */
 }
 
 .seokar-settings-title {
-  font-size: 23px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--text-color);
+    margin: 0;
+    font-size: 1.5em; /* 23px */
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px; /* فاصله بین آیکون و متن */
 }
 
 .seokar-settings-title .dashicons {
-  color: var(--primary-color);
+    font-size: 28px; /* کمی بزرگتر */
+    height: 28px;
+    width: 28px;
+    color: #2271b1; /* var(--wp-admin-theme-color) */
 }
 
 .seokar-settings-version {
-  background: var(--primary-color);
-  color: white;
-  padding: 4px 10px;
-  border-radius: var(--radius);
-  font-size: 12px;
-  font-weight: 500;
+    font-size: 0.9em;
+    color: #50575e; /* var(--wp-admin-color-secondary) */
+    background-color: #e0e0e0;
+    padding: 3px 8px;
+    border-radius: 3px;
 }
 
-/* سیستم تب‌ها */
-.seokar-settings-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  border-bottom: 1px solid var(--border-color);
-  margin-bottom: 25px;
-  position: relative;
+/*--------------------------------------------------------------
+# Tabs Navigation
+--------------------------------------------------------------*/
+.seokar-settings-tabs.nav-tab-wrapper {
+    padding: 0 10px; /* کمی فاصله از لبه‌ها */
+    margin-bottom: 20px;
+    border-bottom: 1px solid #c3c4c7;
+    background-color: #fff; /* پس‌زمینه سفید برای تب‌ها */
 }
 
-.seokar-settings-tab {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  text-decoration: none;
-  color: var(--text-light);
-  font-weight: 500;
-  border: 1px solid transparent;
-  border-bottom: none;
-  border-radius: var(--radius) var(--radius) 0 0;
-  transition: var(--transition);
-  position: relative;
-  background: var(--bg-color);
-  margin-bottom: -1px;
+.seokar-settings-tabs .nav-tab {
+    display: inline-flex; /* استفاده از flex برای تراز آیکون و متن */
+    align-items: center;
+    gap: 6px; /* فاصله بین آیکون و متن تب */
+    padding: 10px 15px;
+    font-size: 14px;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-.seokar-settings-tab .dashicons {
-  font-size: 16px;
-  width: 16px;
-  height: 16px;
+.seokar-settings-tabs .nav-tab .dashicons {
+    font-size: 18px;
+    height: 18px;
+    width: 18px;
+    /* رنگ آیکون معمولا از رنگ متن ارث‌بری می‌کند */
 }
 
-.seokar-settings-tab:hover,
-.seokar-settings-tab:focus {
-  color: var(--primary-color);
-  background: var(--bg-card);
-  border-color: var(--border-color);
-  outline: none;
+.seokar-settings-tabs .nav-tab-active,
+.seokar-settings-tabs .nav-tab-active:hover,
+.seokar-settings-tabs .nav-tab-active:focus {
+    background-color: #f0f0f1; /* var(--wp-admin-bg-color) */
+    border-bottom-color: #f0f0f1; /* مخفی کردن بوردر پایین تب فعال */
+    color: #1d2327; /* var(--wp-admin-text-color) */
+    font-weight: 600;
 }
 
-.seokar-settings-tab.active {
-  background: var(--bg-card);
-  border-color: var(--border-color);
-  color: var(--primary-color);
-  font-weight: 600;
-}
-
-/* محتوای تب‌ها */
+/*--------------------------------------------------------------
+# Content Area
+--------------------------------------------------------------*/
 .seokar-settings-content {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius);
-  padding: 25px;
-  box-shadow: var(--shadow);
-  position: relative;
-  min-height: 300px;
+    padding: 1px 20px 20px 20px; /* 1px padding-top برای جلوگیری از margin collapse */
+    background-color: #fff; /* پس‌زمینه محتوا */
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
 }
 
-.seokar-settings-content.loading {
-  opacity: 0.6;
-  pointer-events: none;
+.seokar-tab-content-inner {
+    /* استایل‌های خاص برای هر تب می‌تواند اینجا یا با ID اضافه شود */
 }
 
-.seokar-settings-content.loading::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border: 3px solid var(--border-color);
-  border-top-color: var(--primary-color);
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  animation: seokar-spin 1s linear infinite;
+.seokar-tab-content-inner h2 {
+    font-size: 1.3em;
+    margin-top: 1em;
+    margin-bottom: 0.8em;
+    padding-bottom: 0.5em;
+    border-bottom: 1px dashed #ddd;
+}
+
+/*--------------------------------------------------------------
+# Forms & Fields (Using WordPress Standards)
+--------------------------------------------------------------*/
+.seokar-settings-form .form-table {
+    margin-top: 0; /* حذف مارجین پیش‌فرض */
+}
+
+.seokar-settings-form .form-table th {
+    width: 200px; /* عرض ثابت برای لیبل‌ها */
+    padding: 15px 10px 15px 0;
+    vertical-align: top; /* تراز عمودی لیبل‌ها */
+    font-weight: 600;
+}
+
+.seokar-settings-form .form-table td {
+    padding: 10px 10px;
+    vertical-align: top; /* تراز عمودی فیلدها */
+}
+
+/* Input Fields */
+.seokar-settings-form input[type="text"],
+.seokar-settings-form input[type="email"],
+.seokar-settings-form input[type="url"],
+.seokar-settings-form input[type="number"],
+.seokar-settings-form input[type="password"],
+.seokar-settings-form select {
+    min-width: 25em; /* حداقل عرض مناسب */
+    max-width: 100%; /* جلوگیری از سرریز */
+}
+
+.seokar-settings-form textarea {
+    min-width: 25em;
+    max-width: 100%;
+    height: auto; /* ارتفاع خودکار */
+    min-height: 100px; /* حداقل ارتفاع */
+}
+
+/* Checkbox & Radio */
+.seokar-settings-form input[type="checkbox"],
+.seokar-settings-form input[type="radio"] {
+    margin-left: 5px; /* کمی فاصله از لیبل */
+}
+.seokar-settings-form fieldset legend { /* برای گروه رادیو باتن‌ها */
+    font-weight: 600;
+    margin-bottom: 5px;
+    padding: 0;
+}
+.seokar-settings-form fieldset label { /* لیبل‌های داخل فیلدست */
+    display: block;
+    margin-bottom: 5px;
+}
+
+
+/* Color Picker */
+.seokar-settings-form .wp-picker-container .wp-color-result.button {
+    min-height: 30px; /* تنظیم ارتفاع دکمه رنگ */
+}
+.seokar-settings-form .wp-picker-container .wp-picker-input-wrap input[type="text"].wp-color-picker {
+    width: 100px !important; /* عرض فیلد هگز */
+    min-width: 100px; /* اطمینان از عرض */
+}
+
+/* File Upload (Basic Styling) */
+.seokar-settings-form input[type="file"] {
+    padding: 5px;
+    border: 1px solid #8c8f94;
+    border-radius: 3px;
+}
+
+/* Image Preview (Example) */
+.seokar-image-preview {
+    display: block;
+    max-width: 200px;
+    max-height: 150px;
+    margin-top: 10px;
+    border: 1px solid #ddd;
+    padding: 5px;
+    background-color: #f9f9f9;
+}
+.seokar-image-preview img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+.seokar-remove-image-button {
+    margin-top: 5px;
+    color: #b32d2e; /* رنگ قرمز برای حذف */
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+
+/* Field Descriptions */
+.seokar-settings-form .form-table p.description {
+    font-size: 0.9em; /* 13px */
+    color: #50575e; /* var(--wp-admin-color-secondary) */
+    margin-top: 5px;
+    font-style: italic;
+}
+
+/*--------------------------------------------------------------
+# Buttons
+--------------------------------------------------------------*/
+.seokar-settings-form p.submit {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+}
+
+/* استایل برای دکمه‌های اضافی مثل Export/Import */
+.seokar-extra-actions {
+    margin-top: 30px;
+    padding: 20px;
+    border: 1px dashed #ccc;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+}
+.seokar-extra-actions h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+}
+.seokar-extra-actions .action-group {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.seokar-extra-actions label {
+    font-weight: 600;
+}
+
+
+/*--------------------------------------------------------------
+# Notices (Leveraging WP Core Styles)
+--------------------------------------------------------------*/
+.seokar-settings-wrap .notice {
+    margin: 15px 0; /* تنظیم مارجین در داخل wrapper */
+}
+.seokar-settings-content .notice {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* Error message specific to our rendering */
+.seokar-settings-error {
+    margin: 15px 0;
+}
+
+/*--------------------------------------------------------------
+# Footer
+--------------------------------------------------------------*/
+.seokar-settings-footer {
+    margin-top: 20px;
+    padding: 15px 20px;
+    border-top: 1px solid #c3c4c7;
+    background-color: #f6f7f7;
+    text-align: center;
+    font-size: 0.9em;
+    color: #50575e;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.seokar-settings-footer p {
+    margin: 0;
+}
+
+.seokar-settings-footer a {
+    text-decoration: none;
+    color: #2271b1; /* var(--wp-admin-theme-color) */
+}
+.seokar-settings-footer a:hover {
+    text-decoration: underline;
+}
+
+/*--------------------------------------------------------------
+# Helper Classes
+--------------------------------------------------------------*/
+.seokar-loading {
+    opacity: 0.5;
+    pointer-events: none; /* جلوگیری از کلیک هنگام لود */
+    position: relative;
+}
+.seokar-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin-top: -10px;
+    margin-left: -10px;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-left-color: #2271b1; /* var(--wp-admin-theme-color) */
+    border-radius: 50%;
+    animation: seokar-spin 0.8s linear infinite;
 }
 
 @keyframes seokar-spin {
-  0% { transform: translate(-50%, -50%) rotate(0deg); }
-  100% { transform: translate(-50%, -50%) rotate(360deg); }
+    to { transform: rotate(360deg); }
 }
 
-/* فرم‌ها و فیلدها */
-.seokar-settings-form {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 25px;
+/*--------------------------------------------------------------
+# Responsiveness
+--------------------------------------------------------------*/
+
+/* Medium Screens (e.g., Tablets, smaller desktops) - Matches WP breakpoint */
+@media screen and (max-width: 782px) {
+    .seokar-settings-form .form-table th,
+    .seokar-settings-form .form-table td {
+        display: block; /* لیبل و فیلد زیر هم */
+        width: 100%;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .seokar-settings-form .form-table th {
+        padding-bottom: 5px; /* فاصله کمتر بین لیبل و فیلد */
+    }
+
+    .seokar-settings-form .form-table td {
+        padding-top: 0;
+    }
+
+    .seokar-settings-form input[type="text"],
+    .seokar-settings-form input[type="email"],
+    .seokar-settings-form input[type="url"],
+    .seokar-settings-form input[type="number"],
+    .seokar-settings-form input[type="password"],
+    .seokar-settings-form select,
+    .seokar-settings-form textarea {
+        min-width: 0; /* حذف حداقل عرض */
+        width: 100%; /* عرض کامل */
+    }
+
+    .seokar-settings-header {
+        flex-direction: column; /* عنوان و ورژن زیر هم */
+        align-items: flex-start; /* تراز به چپ */
+    }
+
+    .seokar-settings-tabs.nav-tab-wrapper {
+        /* ممکن است نیاز به اسکرول افقی باشد اگر تب‌ها زیاد باشند */
+        white-space: nowrap;
+        overflow-x: auto;
+        padding-bottom: 0; /* حذف پدینگ پایین برای اسکرول بهتر */
+    }
+    .seokar-settings-tabs .nav-tab {
+        display: inline-flex; /* اطمینان از نمایش خطی */
+        white-space: normal; /* اجازه شکستن متن در تب‌ها */
+    }
 }
 
-.seokar-form-section {
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 25px;
-  margin-bottom: 25px;
-}
+/* Small Screens (e.g., Mobile) */
+@media screen and (max-width: 600px) {
+    .seokar-settings-wrap {
+        margin-left: 10px;
+        margin-right: 10px;
+    }
 
-.seokar-form-section:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
-  padding-bottom: 0;
-}
+    .seokar-settings-header,
+    .seokar-settings-content,
+    .seokar-settings-footer {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
 
-.seokar-form-section-title {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 15px;
-  color: var(--text-color);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+    .seokar-settings-title {
+        font-size: 1.3em; /* کوچکتر کردن عنوان */
+    }
+    .seokar-settings-title .dashicons {
+        font-size: 24px;
+        height: 24px;
+        width: 24px;
+    }
 
-.seokar-form-row {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 15px;
-  margin-bottom: 20px;
-}
+    .seokar-settings-tabs.nav-tab-wrapper {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+    .seokar-settings-tabs .nav-tab {
+        padding: 8px 10px; /* پدینگ کمتر برای تب‌ها */
+        font-size: 13px;
+    }
+    .seokar-settings-tabs .nav-tab .dashicons {
+        font-size: 16px;
+        height: 16px;
+        width: 16px;
+    }
 
-@media (min-width: 768px) {
-  .seokar-form-row {
-    grid-template-columns: 250px 1fr;
-    align-items: flex-start;
-  }
-}
-
-.seokar-form-label {
-  font-weight: 500;
-  display: block;
-  margin-bottom: 5px;
-}
-
-.seokar-form-label .required {
-  color: var(--error-color);
-}
-
-.seokar-form-field {
-  width: 100%;
-}
-
-.seokar-form-field input[type="text"],
-.seokar-form-field input[type="url"],
-.seokar-form-field input[type="email"],
-.seokar-form-field input[type="number"],
-.seokar-form-field input[type="password"],
-.seokar-form-field select,
-.seokar-form-field textarea {
-  width: 100%;
-  max-width: 100%;
-  padding: 8px 12px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius);
-  background: var(--bg-card);
-  color: var(--text-color);
-  transition: var(--transition);
-  min-height: 36px;
-}
-
-.seokar-form-field input[type="text"]:focus,
-.seokar-form-field input[type="url"]:focus,
-.seokar-form-field input[type="email"]:focus,
-.seokar-form-field input[type="number"]:focus,
-.seokar-form-field input[type="password"]:focus,
-.seokar-form-field select:focus,
-.seokar-form-field textarea:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 1px var(--primary-color);
-  outline: none;
-}
-
-.seokar-form-field textarea {
-  min-height: 100px;
-}
-
-.seokar-form-field .description {
-  font-size: 13px;
-  color: var(--text-light);
-  margin-top: 5px;
-  display: block;
-}
-
-/* فیلدهای خاص */
-.seokar-media-upload-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-}
-
-.seokar-media-preview {
-  max-width: 100%;
-  margin-top: 10px;
-  display: none;
-}
-
-.seokar-media-preview img {
-  max-width: 150px;
-  height: auto;
-  border-radius: var(--radius);
-  border: 1px solid var(--border-color);
-}
-
-.seokar-media-remove {
-  display: none;
-}
-
-/* رنگ‌ها */
-.seokar-color-picker-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.color-preview {
-  width: 30px;
-  height: 30px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border-color);
-  display: none;
-}
-
-/* دکمه‌ها */
-.button-primary {
-  background: var(--primary-color);
-  border-color: var(--primary-color);
-  color: #fff;
-  text-decoration: none;
-  text-shadow: none;
-  padding: 8px 16px;
-  border-radius: var(--radius);
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: var(--transition);
-  border: 1px solid transparent;
-}
-
-.button-primary:hover,
-.button-primary:focus {
-  background: var(--primary-hover);
-  border-color: var(--primary-hover);
-  color: #fff;
-}
-
-.button-secondary {
-  background: var(--bg-color);
-  border: 1px solid var(--border-color);
-  color: var(--text-color);
-  padding: 8px 16px;
-  border-radius: var(--radius);
-  cursor: pointer;
-  font-size: 14px;
-  transition: var(--transition);
-}
-
-.button-secondary:hover,
-.button-secondary:focus {
-  background: #e0e0e0;
-}
-
-/* اعلان‌ها */
-.seokar-notices-container {
-  position: fixed;
-  top: 40px;
-  right: 20px;
-  z-index: 9999;
-  max-width: 400px;
-  width: 100%;
-}
-
-.notice {
-  padding: 12px 15px;
-  margin-bottom: 15px;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  background: var(--bg-card);
-  border-left: 4px solid;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  animation: seokar-fadeIn 0.3s ease;
-}
-
-@keyframes seokar-fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.notice-success {
-  border-left-color: var(--success-color);
-}
-
-.notice-error {
-  border-left-color: var(--error-color);
-}
-
-.notice-warning {
-  border-left-color: var(--warning-color);
-}
-
-.notice-dismiss {
-  background: none;
-  border: none;
-  color: var(--text-light);
-  cursor: pointer;
-  padding: 0 0 0 10px;
-  margin-left: 10px;
-}
-
-.notice-dismiss:hover {
-  color: var(--text-color);
-}
-
-/* اسپینر و وضعیت بارگذاری */
-.seokar-spinner {
-  display: none;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border: 3px solid var(--border-color);
-  border-top-color: var(--primary-color);
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  animation: seokar-spin 1s linear infinite;
-  z-index: 10;
-}
-
-.seokar-spinner.is-active {
-  display: block;
-}
-
-/* ابزارک‌ها */
-.seokar-tooltip {
-  cursor: help;
-  border-bottom: 1px dotted var(--text-light);
-}
-
-.ui-tooltip {
-  max-width: 300px;
-  padding: 10px;
-  background: var(--bg-card);
-  color: var(--text-color);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  font-size: 13px;
-  z-index: 9999;
-}
-
-.ui-tooltip .arrow {
-  width: 0;
-  height: 0;
-  border-style: solid;
-  position: absolute;
-  margin: 5px;
-}
-
-.ui-tooltip .arrow.top {
-  border-width: 0 5px 5px 5px;
-  border-color: transparent transparent var(--border-color) transparent;
-  bottom: -5px;
-  left: 50%;
-  margin-left: -5px;
-}
-
-/* بخش‌های شرطی */
-[data-conditional-target] {
-  transition: var(--transition);
-  overflow: hidden;
-}
-
-/* ریسپانسیو برای دستگاه‌های کوچک */
-@media (max-width: 782px) {
-  .seokar-settings-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  
-  .seokar-settings-tabs {
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    padding-bottom: 5px;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  .seokar-settings-tab {
-    white-space: nowrap;
-    padding: 10px 15px;
-    font-size: 14px;
-  }
-  
-  .seokar-settings-content {
-    padding: 15px;
-  }
-  
-  .seokar-form-row {
-    grid-template-columns: 1fr;
-  }
-  
-  .seokar-notices-container {
-    top: 10px;
-    right: 10px;
-    max-width: calc(100% - 20px);
-  }
-}
-
-@media (max-width: 480px) {
-  .seokar-settings-wrap {
-    margin: 10px;
-  }
-  
-  .seokar-settings-title {
-    font-size: 20px;
-  }
-  
-  .seokar-form-section-title {
-    font-size: 15px;
-  }
-  
-  .button-primary,
-  .button-secondary {
-    width: 100%;
-    text-align: center;
-  }
-}
-
-/* انیمیشن‌ها */
-@keyframes seokar-fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* حالت تیره */
-@media (prefers-color-scheme: dark) {
-  .seokar-settings-wrap {
-    --text-color: #f0f0f1;
-    --text-light: #a7aaad;
-    --border-color: #2c3338;
-    --bg-color: #1d2327;
-    --bg-card: #2c3338;
-    --shadow: 0 1px 3px rgba(0,0,0,0.3);
-  }
-  
-  .seokar-settings-content,
-  .seokar-form-field input[type="text"],
-  .seokar-form-field input[type="url"],
-  .seokar-form-field input[type="email"],
-  .seokar-form-field input[type="number"],
-  .seokar-form-field input[type="password"],
-  .seokar-form-field select,
-  .seokar-form-field textarea {
-    background: #1d2327;
-    color: #f0f0f1;
-  }
-  
-  .button-secondary {
-    background: #3c434a;
-    color: #f0f0f1;
-  }
-  
-  .button-secondary:hover,
-  .button-secondary:focus {
-    background: #4d555e;
-  }
-}
-/* سوئیچ زیبا */
-.seokar-switch {
-  position: relative;
-  display: inline-block;
-  width: 60px;
-  height: 34px;
-}
-.seokar-switch input { opacity: 0; }
-.seokar-slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  transition: .4s;
-}
-.seokar-slider.round { border-radius: 34px; }
-.seokar-slider.round:before {
-  border-radius: 50%;
-}
-.seokar-switch input:checked + .seokar-slider {
-  background-color: #2196F3;
-}
-.seokar-switch input:checked + .seokar-slider:before {
-  transform: translateX(26px);
-}
-
-/* لیاوت صفحه */
-.seokar-settings-container {
-  display: flex;
-  gap: 20px;
-}
-.seokar-settings-form {
-  flex: 3;
-}
-.seokar-settings-sidebar {
-  flex: 1;
-}
-.seokar-settings-card {
-  background: #fff;
-  padding: 20px;
-  margin-bottom: 20px;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    .seokar-extra-actions .action-group {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .seokar-extra-actions .action-group .button {
+        width: 100%;
+        text-align: center;
+    }
+    .seokar-extra-actions input[type="file"] {
+        width: 100%;
+    }
 }
